@@ -1,0 +1,18 @@
+# English translations for piagnostics package.
+# Copyright (C) 2020 Raspberry Pi Ltd
+# This file is distributed under the same license as the piagnostics package.
+# Simon Long <simon@raspberrypi.org>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: piagnostics 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-10-25 11:12+0100\n"
+"PO-Revision-Date: 2019-02-18 15:13+0000\n"
+"Last-Translator: Simon Long <simon@raspberrypi.org>\n"
+"Language-Team: English (British)\n"
+"Language: en_GB\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"

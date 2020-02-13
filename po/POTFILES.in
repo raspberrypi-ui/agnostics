@@ -1,0 +1,5 @@
+[encoding: UTF-8]
+src/piagnostics.c
+[type: gettext/glade] data/piagnostics.ui
+# files added by intltool-prepare
+data/piagnostics.desktop.in
