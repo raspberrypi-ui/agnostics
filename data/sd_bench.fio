@@ -1,0 +1,34 @@
+# Use FIO to emulate the Apps Class A1 performance test.
+# This isn't an exact benchmark as the card isn't in the state required by the
+# specification, but is good enough as a sniff test.
+#
+[global]
+ioengine=libaio
+iodepth=4
+size=64m
+direct=1
+sync=1
+directory=/home/pi
+filename=sd.test.file
+
+[prepare-file]
+rw=write
+bs=512k
+stonewall
+
+[seq-write]
+rw=write
+bs=512k
+stonewall
+
+[rand-4k-write]
+rw=randwrite
+bs=4k
+runtime=10
+stonewall
+
+[rand-4k-read]
+rw=randread
+bs=4k
+runtime=10
+stonewall
