@@ -50,6 +50,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PIAG_RESULT         3
 #define PIAG_ENABLED        4
 
+#define LOGFILE "/home/pi/log.txt"
+
 /* Controls */
 
 static GtkWidget *piag_wd, *piag_tv, *btn_run, *btn_close, *btn_reset, *btn_log;
@@ -172,10 +174,17 @@ static gpointer test_thread (gpointer data)
         gtk_tree_model_get (GTK_TREE_MODEL (tests), &iter, PIAG_FILE, &file, PIAG_NAME, &test_name, PIAG_ENABLED, &enabled, -1);
         if (enabled)
         {
-            if (sys_printf ("sh %s %s", file, "/home/pi/log.txt"))
+            sys_printf ("echo \"\\nTest : %s\" >> %s", test_name, LOGFILE);
+            if (sys_printf ("sh %s %s", file, LOGFILE))
+            {
                 gtk_list_store_set (tests, &iter, PIAG_RESULT, _("<b>FAIL</b>"), -1);
+                sys_printf ("echo \"Test FAIL\" >> %s", LOGFILE);
+            }
             else
+            {
                 gtk_list_store_set (tests, &iter, PIAG_RESULT, _("<b>PASS</b>"), -1);
+                sys_printf ("echo \"Test PASS\" >> %s", LOGFILE);
+            }
         }
         gtk_tree_path_next (tp);
         valid = gtk_tree_model_get_iter (stests, &siter, tp);
@@ -263,6 +272,9 @@ static void run_test (GtkWidget *wid, gpointer data)
     // add a timer to update the dialog
     gdk_threads_add_timeout (1000, dialog_update, NULL);
 
+    sys_printf ("echo \"Raspberry Pi Diagnostics\" > %s", LOGFILE);
+    sys_printf ("date >> %s", LOGFILE);
+
     // launch a thread with the system call to run the tests
     g_thread_new (NULL, test_thread, NULL);
 }
@@ -286,6 +298,13 @@ static void reset_test (GtkWidget *wid, gpointer data)
         gtk_list_store_set (tests, &iter, PIAG_RESULT, _("Not run"), -1);
         valid = gtk_tree_model_iter_next (GTK_TREE_MODEL (tests), &iter);
     }
+}
+
+/* Handler for 'show log' button */
+
+static void show_log (GtkWidget *wid, gpointer data)
+{
+    sys_printf ("mousepad %s &", LOGFILE);
 }
 
 /* Handler for click on tree view check box */
@@ -369,6 +388,7 @@ int main (int argc, char *argv[])
     g_signal_connect (btn_close, "clicked", G_CALLBACK (end_program), NULL);
     g_signal_connect (btn_run, "clicked", G_CALLBACK (run_test), NULL);
     g_signal_connect (btn_reset, "clicked", G_CALLBACK (reset_test), NULL);
+    g_signal_connect (btn_log, "clicked", G_CALLBACK (show_log), NULL);
 
     gtk_widget_hide (btn_reset);
     gtk_widget_hide (btn_log);
