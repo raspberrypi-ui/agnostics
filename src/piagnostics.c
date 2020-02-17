@@ -58,6 +58,7 @@ static GtkWidget *msg_dlg, *status, *progress, *cancel;
 /* List of tests */
 
 GtkListStore *tests;
+GtkTreeModel *stests;
 
 /* Name of current test - global for inter-thread access */
 
@@ -85,7 +86,6 @@ static int sys_printf (const char * format, ...)
 
     va_start (args, format);
     vsprintf (buffer, format, args);
-    printf ("%s\n", buffer);
     fp = popen (buffer, "r");
     va_end (args);
     return pclose (fp);
@@ -112,6 +112,8 @@ static int find_tests (void)
             }
         }
         g_dir_close (data_dir);
+        stests = gtk_tree_model_sort_new_with_model (GTK_TREE_MODEL (tests));
+        gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (stests), PIAG_NAME, GTK_SORT_ASCENDING);
     }
 }
 
@@ -136,6 +138,8 @@ static void parse_test_file (gchar *path)
         }
         if (name && desc)
         {
+            *(name + strlen (name) - 1) = 0;
+            *(desc + strlen (desc) - 1) = 0;
             mutext = g_strdup_printf (_("<b>%s</b>\n%s"), name, desc);
             gtk_list_store_append (tests, &entry);
             gtk_list_store_set (tests, &entry, PIAG_FILE, path, PIAG_NAME, name, 
@@ -154,22 +158,27 @@ static void parse_test_file (gchar *path)
 
 static gpointer test_thread (gpointer data)
 {
-    GtkTreeIter iter;
+    GtkTreeIter iter, siter;
+    GtkTreePath *tp;
     gchar *file;
-    gboolean valid, run;
+    gboolean valid, enabled;
 
-    valid = gtk_tree_model_get_iter_first (GTK_TREE_MODEL (tests), &iter);
+    // for some reason iterators don't iterate on sorted models...
+    tp = gtk_tree_path_new_from_string ("0");
+    valid = gtk_tree_model_get_iter (stests, &siter, tp);
     while (valid)
     {
-        gtk_tree_model_get (GTK_TREE_MODEL (tests), &iter, PIAG_FILE, &file, PIAG_NAME, &test_name, PIAG_ENABLED, &run, -1);
-        if (run)
+        gtk_tree_model_sort_convert_iter_to_child_iter (GTK_TREE_MODEL_SORT (stests), &iter, &siter);
+        gtk_tree_model_get (GTK_TREE_MODEL (tests), &iter, PIAG_FILE, &file, PIAG_NAME, &test_name, PIAG_ENABLED, &enabled, -1);
+        if (enabled)
         {
             if (sys_printf ("sh %s %s", file, "/home/pi/log.txt"))
                 gtk_list_store_set (tests, &iter, PIAG_RESULT, _("<b>FAIL</b>"), -1);
             else
                 gtk_list_store_set (tests, &iter, PIAG_RESULT, _("<b>PASS</b>"), -1);
         }
-        valid = gtk_tree_model_iter_next (GTK_TREE_MODEL (tests), &iter);
+        gtk_tree_path_next (tp);
+        valid = gtk_tree_model_get_iter (stests, &siter, tp);
     }
 
     g_free (test_name);
@@ -186,7 +195,7 @@ static int dialog_update (gpointer data)
 
     if (test_name)
     {
-        buffer = g_strdup_printf (_("Running %s test..."), test_name);
+        buffer = g_strdup_printf (_("Running %s..."), test_name);
         gtk_label_set_text (GTK_LABEL (status), buffer);
         g_free (buffer);
         gtk_progress_bar_pulse (GTK_PROGRESS_BAR (progress));
@@ -283,12 +292,13 @@ static void reset_test (GtkWidget *wid, gpointer data)
 
 static void run_toggled (GtkCellRendererToggle *cell, gchar *path, gpointer data)
 {
-    GtkTreeIter iter;
+    GtkTreeIter iter, siter;
     gboolean val;
 
-    gtk_tree_model_get_iter_from_string (GTK_TREE_MODEL (tests), &iter, path);
+    gtk_tree_model_get_iter_from_string (stests, &siter, path);
+    gtk_tree_model_sort_convert_iter_to_child_iter (GTK_TREE_MODEL_SORT (stests), &iter, &siter);
     gtk_tree_model_get (GTK_TREE_MODEL (tests), &iter, PIAG_ENABLED, &val, -1);
-    gtk_list_store_set (tests, &iter, PIAG_ENABLED, 1 - val, -1);
+    gtk_list_store_set (GTK_LIST_STORE (tests), &iter, PIAG_ENABLED, 1 - val, -1);
 }
 
 /* Handler for 'close' button */
@@ -334,7 +344,7 @@ int main (int argc, char *argv[])
     gtk_window_set_default_size (GTK_WINDOW (piag_wd), 500, 350);
 
     // set up tree view
-    gtk_tree_view_set_model (GTK_TREE_VIEW (piag_tv), GTK_TREE_MODEL (tests));
+    gtk_tree_view_set_model (GTK_TREE_VIEW (piag_tv), GTK_TREE_MODEL (stests));
 
     crt = gtk_cell_renderer_text_new ();
     g_object_set (G_OBJECT (crt), "wrap-width", 350, "wrap-mode", PANGO_WRAP_WORD_CHAR, NULL);
