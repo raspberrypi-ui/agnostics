@@ -47,28 +47,80 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PIAG_FILE           0
 #define PIAG_NAME           1
 #define PIAG_TEXT           2
-#define PIAG_STATUS         3
+#define PIAG_RESULT         3
 #define PIAG_ENABLED        4
-
-/* Test status */
-
-typedef enum {
-     STATUS_NOTRUN,
-     STATUS_RUNNING,
-     STATUS_PASS,
-     STATUS_FAIL
-} TEST_STATUS_T;
 
 /* Controls */
 
-static GtkWidget *piag_wd, *piag_nb, *piag_tv, *btn_run, *btn_cancel;
+static GtkWidget *piag_wd, *piag_tv, *btn_run, *btn_close, *btn_reset, *btn_log;
+static GtkWidget *msg_dlg, *status, *progress, *cancel;
+
+/* List of tests */
 
 GtkListStore *tests;
+
+/* Name of current test - global for inter-thread access */
+
+gchar *test_name;
+
+/* Function prototypes */
+
+static int sys_printf (const char * format, ...);
+static int find_tests (void);
+static void parse_test_file (gchar *path);
+static gpointer test_thread (gpointer data);
+static int dialog_update (gpointer data);
+static void run_test (GtkWidget *wid, gpointer data);
+static void reset_test (GtkWidget *wid, gpointer data);
+static void run_toggled (GtkCellRendererToggle *cell, gchar *path, gpointer data);
+static void end_program (GtkWidget *wid, gpointer data);
+
+/* System function with printf formatting */
+
+static int sys_printf (const char * format, ...)
+{
+    char buffer[256];
+    va_list args;
+    FILE *fp;
+
+    va_start (args, format);
+    vsprintf (buffer, format, args);
+    printf ("%s\n", buffer);
+    fp = popen (buffer, "r");
+    va_end (args);
+    return pclose (fp);
+}
+
+/* Find all test files in the data directory and add them to the tests list store */
+
+static int find_tests (void)
+{
+    GDir *data_dir;
+    const gchar *name;
+    gchar *path;
+
+    data_dir = g_dir_open (PACKAGE_DATA_DIR, 0, NULL);
+    if (data_dir)
+    {
+        while ((name = g_dir_read_name (data_dir)) != NULL)
+        {
+            if (!g_strcmp0 (name + strlen (name) - 3, ".sh"))
+            {
+                path = g_strdup_printf ("%s/%s", PACKAGE_DATA_DIR, name);
+                parse_test_file (path);
+                g_free (path);
+            }
+        }
+        g_dir_close (data_dir);
+    }
+}
+
+/* Open the supplied test file and populate an entry in the tests list store from it */
 
 static void parse_test_file (gchar *path)
 {
     FILE *fp;
-    char *line = NULL, *name = NULL, *desc = NULL, *mutext;
+    char *line = NULL, *name = NULL, *desc = NULL, *mutext = NULL;
     size_t len = 0;
     GtkTreeIter entry;
 
@@ -86,49 +138,150 @@ static void parse_test_file (gchar *path)
         {
             mutext = g_strdup_printf (_("<b>%s</b>\n%s"), name, desc);
             gtk_list_store_append (tests, &entry);
-            gtk_list_store_set (tests, &entry,
-                PIAG_FILE, path,
-                PIAG_NAME, name,
-                PIAG_TEXT, mutext,
-                PIAG_STATUS, STATUS_NOTRUN,
-                PIAG_ENABLED, TRUE,
-                -1);
-            free (mutext);
+            gtk_list_store_set (tests, &entry, PIAG_FILE, path, PIAG_NAME, name, 
+                PIAG_TEXT, mutext, PIAG_RESULT, _("Not Run"), PIAG_ENABLED, TRUE, -1);
         }
+        if (mutext) free (mutext);
         if (name) free (name);
         if (desc) free (desc);
-        name = NULL;
-        desc = NULL;
 
         free (line);
         fclose (fp);
     }
 }
 
-static int find_tests (void)
-{
-    GDir *data_dir;
-    GError *err;
-    const gchar *name;
-    gchar *path;
+/* Thread which runs all enabled tests in list store */
 
-    data_dir = g_dir_open (PACKAGE_DATA_DIR, 0, &err);
-    if (data_dir)
+static gpointer test_thread (gpointer data)
+{
+    GtkTreeIter iter;
+    gchar *file;
+    gboolean valid, run;
+
+    valid = gtk_tree_model_get_iter_first (GTK_TREE_MODEL (tests), &iter);
+    while (valid)
     {
-        while ((name = g_dir_read_name (data_dir)) != NULL)
+        gtk_tree_model_get (GTK_TREE_MODEL (tests), &iter, PIAG_FILE, &file, PIAG_NAME, &test_name, PIAG_ENABLED, &run, -1);
+        if (run)
         {
-            if (!g_strcmp0 (name + strlen (name) - 3, ".sh"))
-            {
-                path = g_strdup_printf ("%s/%s", PACKAGE_DATA_DIR, name);
-                parse_test_file (path);
-                g_free (path);
-            }
+            if (sys_printf ("sh %s %s", file, "/home/pi/log.txt"))
+                gtk_list_store_set (tests, &iter, PIAG_RESULT, _("<b>FAIL</b>"), -1);
+            else
+                gtk_list_store_set (tests, &iter, PIAG_RESULT, _("<b>PASS</b>"), -1);
         }
-        g_dir_close (data_dir);
+        valid = gtk_tree_model_iter_next (GTK_TREE_MODEL (tests), &iter);
+    }
+
+    g_free (test_name);
+    test_name = NULL;
+
+    return NULL;
+}
+
+/* Handler for timer call during tests to update dialog */
+
+static int dialog_update (gpointer data)
+{
+    gchar *buffer;
+
+    if (test_name)
+    {
+        buffer = g_strdup_printf (_("Running %s test..."), test_name);
+        gtk_label_set_text (GTK_LABEL (status), buffer);
+        g_free (buffer);
+        gtk_progress_bar_pulse (GTK_PROGRESS_BAR (progress));
+        return TRUE;
+    }
+    else
+    {
+        gtk_widget_destroy (msg_dlg);
+        gtk_tree_view_column_set_visible (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 1), FALSE);
+        gtk_tree_view_column_set_visible (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 2), TRUE);
+        gtk_widget_show (btn_reset);
+        gtk_widget_show (btn_log);
+        gtk_widget_hide (btn_run);
+        return FALSE;
     }
 }
 
-static void run_toggled (GtkCellRendererToggle *cell, gchar *path, gpointer user_data)
+/* Handler for 'run test' button */
+
+static void run_test (GtkWidget *wid, gpointer data)
+{
+    GdkColor col;
+
+    // create the progress dialog
+    msg_dlg = (GtkWidget *) gtk_window_new (GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title (GTK_WINDOW (msg_dlg), "");
+    gtk_window_set_modal (GTK_WINDOW (msg_dlg), TRUE);
+    gtk_window_set_decorated (GTK_WINDOW (msg_dlg), FALSE);
+    gtk_window_set_destroy_with_parent (GTK_WINDOW (msg_dlg), TRUE);
+    gtk_window_set_skip_taskbar_hint (GTK_WINDOW (msg_dlg), TRUE);
+    gtk_window_set_transient_for (GTK_WINDOW (msg_dlg), GTK_WINDOW (piag_wd));
+    gtk_window_set_position (GTK_WINDOW (msg_dlg), GTK_WIN_POS_CENTER_ON_PARENT);
+
+    // add border
+    GtkWidget *frame = gtk_frame_new (NULL);
+    gtk_container_add (GTK_CONTAINER (msg_dlg), frame);
+
+    GtkWidget *eb = gtk_event_box_new ();
+    gtk_container_add (GTK_CONTAINER (frame), eb);
+    //gdk_color_parse ("#FFFFFF", &col);
+    //gtk_widget_modify_bg (eb, GTK_STATE_NORMAL, &col);
+
+    // add container
+    GtkWidget *box = (GtkWidget *) gtk_box_new (GTK_ORIENTATION_VERTICAL, 5);
+    gtk_container_set_border_width (GTK_CONTAINER (box), 10);
+    gtk_container_add (GTK_CONTAINER (eb), box);
+
+    // add message
+    status = (GtkWidget *) gtk_label_new (_("Running tests..."));
+    gtk_label_set_width_chars (GTK_LABEL (status), 30);
+    gtk_box_pack_start (GTK_BOX (box), status, FALSE, FALSE, 5);
+
+    // add progress bar
+    progress = (GtkWidget *) gtk_progress_bar_new ();
+    gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (progress), 0.0);
+    gtk_box_pack_start (GTK_BOX (box), progress, FALSE, FALSE, 5);
+
+    // add cancel button
+    cancel = (GtkWidget *) gtk_button_new_with_label (_("Cancel"));
+    gtk_box_pack_start (GTK_BOX (box), cancel, FALSE, FALSE, 5);
+    //g_signal_connect (cancel, "clicked", G_CALLBACK (on_cancel), NULL);
+
+    gtk_widget_show_all (GTK_WIDGET (msg_dlg));
+
+    // add a timer to update the dialog
+    gdk_threads_add_timeout (1000, dialog_update, NULL);
+
+    // launch a thread with the system call to run the tests
+    g_thread_new (NULL, test_thread, NULL);
+}
+
+/* Handler for 'reset' button */
+
+static void reset_test (GtkWidget *wid, gpointer data)
+{
+    GtkTreeIter iter;
+    gboolean valid;
+
+    gtk_tree_view_column_set_visible (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 1), TRUE);
+    gtk_tree_view_column_set_visible (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 2), FALSE);
+    gtk_widget_hide (btn_reset);
+    gtk_widget_hide (btn_log);
+    gtk_widget_show (btn_run);
+
+    valid = gtk_tree_model_get_iter_first (GTK_TREE_MODEL (tests), &iter);
+    while (valid)
+    {
+        gtk_list_store_set (tests, &iter, PIAG_RESULT, _("Not run"), -1);
+        valid = gtk_tree_model_iter_next (GTK_TREE_MODEL (tests), &iter);
+    }
+}
+
+/* Handler for click on tree view check box */
+
+static void run_toggled (GtkCellRendererToggle *cell, gchar *path, gpointer data)
 {
     GtkTreeIter iter;
     gboolean val;
@@ -138,7 +291,9 @@ static void run_toggled (GtkCellRendererToggle *cell, gchar *path, gpointer user
     gtk_list_store_set (tests, &iter, PIAG_ENABLED, 1 - val, -1);
 }
 
-static void end_program (GtkWidget *wid, gpointer ptr)
+/* Handler for 'close' button */
+
+static void end_program (GtkWidget *wid, gpointer data)
 {
     gtk_main_quit ();
 }
@@ -148,7 +303,7 @@ static void end_program (GtkWidget *wid, gpointer ptr)
 int main (int argc, char *argv[])
 {
     GtkBuilder *builder;
-    GtkCellRenderer *crt, *crb;
+    GtkCellRenderer *crt, *crb, *crr;
 
 #ifdef ENABLE_NLS
     setlocale (LC_ALL, "");
@@ -162,7 +317,7 @@ int main (int argc, char *argv[])
     gtk_icon_theme_prepend_search_path (gtk_icon_theme_get_default(), PACKAGE_DATA_DIR);
 
     // find test files in data directory
-    tests = gtk_list_store_new (5, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT, G_TYPE_BOOLEAN);
+    tests = gtk_list_store_new (5, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_BOOLEAN);
     find_tests ();
 
     // build the UI
@@ -170,10 +325,11 @@ int main (int argc, char *argv[])
     gtk_builder_add_from_file (builder, PACKAGE_DATA_DIR "/piagnostics.ui", NULL);
 
     piag_wd = (GtkWidget *) gtk_builder_get_object (builder, "piag_wd");
-    piag_nb = (GtkWidget *) gtk_builder_get_object (builder, "piag_nb");
     piag_tv = (GtkWidget *) gtk_builder_get_object (builder, "piag_tv");
     btn_run = (GtkWidget *) gtk_builder_get_object (builder, "btn_run");
-    btn_cancel = (GtkWidget *) gtk_builder_get_object (builder, "btn_cancel");
+    btn_close = (GtkWidget *) gtk_builder_get_object (builder, "btn_close");
+    btn_reset = (GtkWidget *) gtk_builder_get_object (builder, "btn_reset");
+    btn_log = (GtkWidget *) gtk_builder_get_object (builder, "btn_log");
 
     gtk_window_set_default_size (GTK_WINDOW (piag_wd), 500, 350);
 
@@ -184,17 +340,28 @@ int main (int argc, char *argv[])
     g_object_set (G_OBJECT (crt), "wrap-width", 350, "wrap-mode", PANGO_WRAP_WORD_CHAR, NULL);
     crb = gtk_cell_renderer_toggle_new ();
     g_object_set (G_OBJECT (crb), "activatable", TRUE, NULL);
+    crr = gtk_cell_renderer_text_new ();
 
     gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (piag_tv), 0, _("Test"), crt, "markup", PIAG_TEXT, NULL);
     gtk_tree_view_column_set_expand (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 0), TRUE);
 
     gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (piag_tv), 1, _("Run Test?"), crb, "active", PIAG_ENABLED, NULL);
     gtk_tree_view_column_set_expand (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 1), FALSE);
+    gtk_tree_view_column_set_visible (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 1), TRUE);
 
-    // connect button handlers
+    gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (piag_tv), 2, _("Result"), crr, "markup", PIAG_RESULT, NULL);
+    gtk_tree_view_column_set_expand (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 2), FALSE);
+    gtk_tree_view_column_set_visible (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 2), FALSE);
+
+    // connect handlers
     g_signal_connect (crb, "toggled", G_CALLBACK (run_toggled), NULL);
     g_signal_connect (piag_wd, "delete-event", G_CALLBACK (end_program), NULL);
-    g_signal_connect (btn_cancel, "clicked", G_CALLBACK (end_program), NULL);
+    g_signal_connect (btn_close, "clicked", G_CALLBACK (end_program), NULL);
+    g_signal_connect (btn_run, "clicked", G_CALLBACK (run_test), NULL);
+    g_signal_connect (btn_reset, "clicked", G_CALLBACK (reset_test), NULL);
+
+    gtk_widget_hide (btn_reset);
+    gtk_widget_hide (btn_log);
 
     gtk_widget_show (piag_wd);
     g_object_unref (builder);
