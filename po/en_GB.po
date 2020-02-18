@@ -1,11 +1,11 @@
-# English translations for piagnostics package.
+# English translations for agnostics package.
 # Copyright (C) 2020 Raspberry Pi Ltd
-# This file is distributed under the same license as the piagnostics package.
+# This file is distributed under the same license as the agnostics package.
 # Simon Long <simon@raspberrypi.org>, 2020.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: piagnostics 1.0\n"
+"Project-Id-Version: agnostics 1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-10-25 11:12+0100\n"
 "PO-Revision-Date: 2019-02-18 15:13+0000\n"

@@ -1,18 +1,18 @@
-uidir = $(datadir)/piagnostics
+uidir = $(datadir)/agnostics/ui
 
-ui_in_files = piagnostics.ui
+ui_in_files = agnostics.ui
 	
 ui_DATA = $(ui_in_files)
 
 desktopdir=/usr/share/applications
 
 desktop_in_files= \
-	piagnostics.desktop.in \
+	agnostics.desktop.in \
 	$(NULL)
 desktop_DATA = $(desktop_in_files:.desktop.in=.desktop)
 @INTLTOOL_DESKTOP_RULE@
 
-testsdir = $(datadir)/piagnostics
+testsdir = $(datadir)/agnostics
 
 tests_in_files = 	sdtest.sh \
 				sd_bench.fio

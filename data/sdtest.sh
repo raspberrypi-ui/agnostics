@@ -1,7 +1,7 @@
 #!/bin/bash
 #NAME=SD Card Speed Test
 #DESC=This test determines whether an SD card can read and write data fast enough to provide adequate performance in a Raspberry Pi.
-RES=$(fio --output-format=terse /usr/share/piagnostics/sd_bench.fio | cut -f 3,45,86 -d";" -)
+RES=$(fio --output-format=terse /usr/share/agnostics/sd_bench.fio | cut -f 3,45,86 -d";" -)
 echo "$RES" >> /home/pi/log.txt
 prep=$(echo "$RES" | head -n 1 | cut -d ";" -f 3 | cut -d "." -f 1)
 swri=$(echo "$RES" | head -n 2 | tail -n 1 | cut -d ";" -f 3 | cut -d "." -f 1)

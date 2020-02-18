@@ -1,25 +1,25 @@
-bin_PROGRAMS = piagnostics
+bin_PROGRAMS = agnostics
 
-piagnostics_CFLAGS = \
+agnostics_CFLAGS = \
 	-I$(top_srcdir) \
 	-DPACKAGE_LIB_DIR=\""$(libdir)"\" \
-	-DPACKAGE_DATA_DIR=\""$(datadir)/piagnostics"\" \
-	-DPACKAGE_UI_DIR=\""$(datadir)/piagnostics/ui"\" \
+	-DPACKAGE_DATA_DIR=\""$(datadir)/agnostics"\" \
+	-DPACKAGE_UI_DIR=\""$(datadir)/agnostics/ui"\" \
 	-DPACKAGE_BIN_DIR=\""$(bindir)"\" \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
 	$(PACKAGE_CFLAGS) \
 	$(G_CAST_CHECKS)
 
-piagnostics_SOURCES = piagnostics.c
+agnostics_SOURCES = agnostics.c
 
-piagnostics_includedir = $(includedir)/piagnostics
+agnostics_includedir = $(includedir)/agnostics
 
-piagnostics_include_HEADERS =
+agnostics_include_HEADERS =
 
-piagnostics_LDFLAGS = $(DYNAMIC_FLAGS)
-piagnostics_DEPENDENCIES_EXTRA = $(BUILTIN_PLUGINS)
+agnostics_LDFLAGS = $(DYNAMIC_FLAGS)
+agnostics_DEPENDENCIES_EXTRA = $(BUILTIN_PLUGINS)
 
-piagnostics_LDADD = \
+agnostics_LDADD = \
 		$(BUILTIN_PLUGINS) \
 		$(PACKAGE_LIBS) \
 		$(X11_LIBS) \

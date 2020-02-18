@@ -1,6 +1,6 @@
 AC_PREREQ(2.53)
 AC_CONFIG_MACRO_DIR([m4])
-AC_INIT(piagnostics,1.0,http://raspberrypi.org/)
+AC_INIT(agnostics,1.0,http://raspberrypi.org/)
 AM_INIT_AUTOMAKE([-Wall foreign subdir-objects no-dist-gzip dist-xz])
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -145,7 +145,7 @@ do
     echo $lang >> $srcdir/po/LINGUAS
 done
 
-GETTEXT_PACKAGE=piagnostics
+GETTEXT_PACKAGE=agnostics
 AC_SUBST(GETTEXT_PACKAGE)
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [Gettext package.])
 

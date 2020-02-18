@@ -6,7 +6,7 @@ SUBDIRS = src data po
 
 EXTRA_DIST = \
         autogen.sh \
-        piagnostics.pc.in
+        agnostics.pc.in
 
 install-data-local:
 	@$(NORMAL_INSTALL)
