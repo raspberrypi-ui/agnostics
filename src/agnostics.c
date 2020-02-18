@@ -177,12 +177,12 @@ static gpointer test_thread (gpointer data)
             sys_printf ("echo \"\\nTest : %s\" >> %s", test_name, LOGFILE);
             if (sys_printf ("sh %s %s", file, LOGFILE))
             {
-                gtk_list_store_set (tests, &iter, PIAG_RESULT, _("<b>FAIL</b>"), -1);
+                gtk_list_store_set (tests, &iter, PIAG_RESULT, _("<span foreground=\"#FF0000\"><b>FAIL</b></span>"), -1);
                 sys_printf ("echo \"Test FAIL\" >> %s", LOGFILE);
             }
             else
             {
-                gtk_list_store_set (tests, &iter, PIAG_RESULT, _("<b>PASS</b>"), -1);
+                gtk_list_store_set (tests, &iter, PIAG_RESULT, _("<span foreground=\"#00FF00\"><b>PASS</b></span>"), -1);
                 sys_printf ("echo \"Test PASS\" >> %s", LOGFILE);
             }
         }
