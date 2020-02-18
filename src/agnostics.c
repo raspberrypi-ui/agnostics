@@ -65,6 +65,7 @@ GtkTreeModel *stests;
 /* Name of current test - global for inter-thread access */
 
 gchar *test_name;
+gboolean cancelled;
 
 /* Function prototypes */
 
@@ -76,7 +77,9 @@ static int dialog_update (gpointer data);
 static void run_test (GtkWidget *wid, gpointer data);
 static void reset_test (GtkWidget *wid, gpointer data);
 static void run_toggled (GtkCellRendererToggle *cell, gchar *path, gpointer data);
+static void cancel_test (GtkWidget *wid, gpointer data);
 static void end_program (GtkWidget *wid, gpointer data);
+
 
 /* System function with printf formatting */
 
@@ -168,7 +171,7 @@ static gpointer test_thread (gpointer data)
     // for some reason iterators don't iterate on sorted models...
     tp = gtk_tree_path_new_from_string ("0");
     valid = gtk_tree_model_get_iter (stests, &siter, tp);
-    while (valid)
+    while (valid && !cancelled)
     {
         gtk_tree_model_sort_convert_iter_to_child_iter (GTK_TREE_MODEL_SORT (stests), &iter, &siter);
         gtk_tree_model_get (GTK_TREE_MODEL (tests), &iter, PIAG_FILE, &file, PIAG_NAME, &test_name, PIAG_ENABLED, &enabled, -1);
@@ -204,7 +207,10 @@ static int dialog_update (gpointer data)
 
     if (test_name)
     {
-        buffer = g_strdup_printf (_("Running %s..."), test_name);
+        if (cancelled)
+            buffer = g_strdup_printf (_("Cancelled - waiting for current test to complete..."), test_name);
+        else
+            buffer = g_strdup_printf (_("Running %s..."), test_name);
         gtk_label_set_text (GTK_LABEL (status), buffer);
         g_free (buffer);
         gtk_progress_bar_pulse (GTK_PROGRESS_BAR (progress));
@@ -238,7 +244,7 @@ static void run_test (GtkWidget *wid, gpointer data)
     gtk_window_set_transient_for (GTK_WINDOW (msg_dlg), GTK_WINDOW (piag_wd));
     gtk_widget_set_name (msg_dlg, "pixbox");
 
-    //g_signal_connect (cancel, "clicked", G_CALLBACK (on_cancel), NULL);
+    g_signal_connect (cancel, "clicked", G_CALLBACK (cancel_test), NULL);
     gtk_widget_show_all (GTK_WIDGET (msg_dlg));
     g_object_unref (builder);
 
@@ -249,6 +255,7 @@ static void run_test (GtkWidget *wid, gpointer data)
     sys_printf ("date >> %s", LOGFILE);
 
     // launch a thread with the system call to run the tests
+    cancelled = FALSE;
     g_thread_new (NULL, test_thread, NULL);
 }
 
@@ -291,6 +298,13 @@ static void run_toggled (GtkCellRendererToggle *cell, gchar *path, gpointer data
     gtk_tree_model_sort_convert_iter_to_child_iter (GTK_TREE_MODEL_SORT (stests), &iter, &siter);
     gtk_tree_model_get (GTK_TREE_MODEL (tests), &iter, PIAG_ENABLED, &val, -1);
     gtk_list_store_set (GTK_LIST_STORE (tests), &iter, PIAG_ENABLED, 1 - val, -1);
+}
+
+/* Handler for 'cancel' button on progress dialog */
+
+static void cancel_test (GtkWidget *wid, gpointer data)
+{
+    cancelled = TRUE;
 }
 
 /* Handler for 'close' button */
