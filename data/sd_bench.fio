@@ -7,7 +7,7 @@ ioengine=libaio
 iodepth=4
 size=64m
 direct=1
-sync=1
+end_fsync=1
 directory=/home/pi
 filename=sd.test.file
 
@@ -32,3 +32,6 @@ rw=randread
 bs=4k
 runtime=10
 stonewall
+
+# execute with command $ fio --output-format=terse sd_bench.fio | cut -f 3,7,8,48,49 -d";" -
+# testname, read bandwidth, read iops, write bandwidth, write iops

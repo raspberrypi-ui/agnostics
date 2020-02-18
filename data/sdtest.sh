@@ -1,27 +1,21 @@
 #!/bin/bash
 #NAME=SD Card Speed Test
 #DESC=This test determines whether an SD card can read and write data fast enough to provide adequate performance in a Raspberry Pi.
-RES=$(fio --output-format=terse /usr/share/agnostics/sd_bench.fio | cut -f 3,45,86 -d";" -)
-echo "$RES" >> /home/pi/log.txt
-prep=$(echo "$RES" | head -n 1 | cut -d ";" -f 3 | cut -d "." -f 1)
-swri=$(echo "$RES" | head -n 2 | tail -n 1 | cut -d ";" -f 3 | cut -d "." -f 1)
-rwri=$(echo "$RES" | head -n 3 | tail -n 1 | cut -d ";" -f 3 | cut -d "." -f 1)
-rrea=$(echo "$RES" | head -n 4 | tail -n 1 | cut -d ";" -f 2 | cut -d "." -f 1)
-# some arbitrary pass/fail criteria here for now...
+RES=$(fio --output-format=terse /usr/share/agnostics/sd_bench.fio | cut -f 3,7,8,48,49 -d";" -)
+echo "$RES" >> $1
+swri=$(echo "$RES" | head -n 2 | tail -n 1 | cut -d ";" -f 4)
+rwri=$(echo "$RES" | head -n 3 | tail -n 1 | cut -d ";" -f 5)
+rrea=$(echo "$RES" | head -n 4 | tail -n 1 | cut -d ";" -f 3)
 pass=0
-if [ "$prep" -lt 9000 ] ; then
-    echo "Prepare speed - FAIL" >> $1
-    pass=1
-fi
-if [ "$swri" -lt 7500 ] ; then
+if [ "$swri" -lt 10000 ] ; then
     echo "Sequential write speed - FAIL" >> $1
     pass=1
 fi
-if [ "$rwri" -lt 2500 ] ; then
+if [ "$rwri" -lt 500 ] ; then
     echo "Random write speed - FAIL" >> $1
     pass=1
 fi
-if [ "$rrea" -lt 9000 ] ; then
+if [ "$rrea" -lt 1500 ] ; then
     echo "Random read speed - FAIL" >> $1
     pass=1
 fi
