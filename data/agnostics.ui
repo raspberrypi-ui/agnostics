@@ -108,6 +108,7 @@
           <object class="GtkButtonBox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="spacing">3</property>
             <property name="layout_style">start</property>
             <child>
               <object class="GtkButton" id="btn_close">

@@ -40,6 +40,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <gtk/gtk.h>
 #include <gdk/gdkx.h>
 
+#include <sys/wait.h>
+
 #include <libintl.h>
 
 /* Columns in tree store */
@@ -66,6 +68,7 @@ GtkTreeModel *stests;
 
 gchar *test_name;
 gboolean cancelled;
+int testpid;
 
 /* Function prototypes */
 
@@ -167,6 +170,7 @@ static gpointer test_thread (gpointer data)
     GtkTreePath *tp;
     gchar *file;
     gboolean valid, enabled;
+    int status;
 
     // for some reason iterators don't iterate on sorted models...
     tp = gtk_tree_path_new_from_string ("0");
@@ -178,15 +182,30 @@ static gpointer test_thread (gpointer data)
         if (enabled)
         {
             sys_printf ("echo \"\\nTest : %s\" >> %s", test_name, LOGFILE);
-            if (sys_printf ("sh %s %s", file, LOGFILE))
+            testpid = fork ();
+
+            if (testpid == 0)
             {
-                gtk_list_store_set (tests, &iter, PIAG_RESULT, _("<span foreground=\"#FF0000\"><b>FAIL</b></span>"), -1);
-                sys_printf ("echo \"Test FAIL\" >> %s", LOGFILE);
+                execl ("/bin/sh", "sh", file, LOGFILE, NULL);
+                exit (0);
             }
             else
             {
-                gtk_list_store_set (tests, &iter, PIAG_RESULT, _("<span foreground=\"#00FF00\"><b>PASS</b></span>"), -1);
-                sys_printf ("echo \"Test PASS\" >> %s", LOGFILE);
+                wait (&status);
+                if (cancelled)
+                {
+                    gtk_list_store_set (tests, &iter, PIAG_RESULT, _("Aborted"), -1);
+                }
+                else if (status)
+                {
+                    gtk_list_store_set (tests, &iter, PIAG_RESULT, _("<span foreground=\"#FF0000\"><b>FAIL</b></span>"), -1);
+                    sys_printf ("echo \"Test FAIL\" >> %s", LOGFILE);
+                }
+                else
+                {
+                    gtk_list_store_set (tests, &iter, PIAG_RESULT, _("<span foreground=\"#00FF00\"><b>PASS</b></span>"), -1);
+                    sys_printf ("echo \"Test PASS\" >> %s", LOGFILE);
+                }
             }
         }
         gtk_tree_path_next (tp);
@@ -305,6 +324,8 @@ static void run_toggled (GtkCellRendererToggle *cell, gchar *path, gpointer data
 static void cancel_test (GtkWidget *wid, gpointer data)
 {
     cancelled = TRUE;
+    kill (testpid, SIGTERM);
+    sys_printf ("echo \"Test aborted\" >> %s", LOGFILE);
 }
 
 /* Handler for 'close' button */

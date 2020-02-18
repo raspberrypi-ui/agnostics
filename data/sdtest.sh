@@ -28,4 +28,5 @@ fi
 if [ "$pass" -eq 0 ] ; then
     echo "All tests passed" >> $1
 fi
+rm -f ~/sd.test.file
 return $pass
