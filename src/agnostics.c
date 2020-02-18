@@ -191,6 +191,7 @@ static gpointer test_thread (gpointer data)
             }
             else
             {
+                setpgid (testpid, testpid);
                 wait (&status);
                 if (cancelled)
                 {
@@ -324,7 +325,7 @@ static void run_toggled (GtkCellRendererToggle *cell, gchar *path, gpointer data
 static void cancel_test (GtkWidget *wid, gpointer data)
 {
     cancelled = TRUE;
-    kill (testpid, SIGTERM);
+    killpg (testpid, SIGTERM);
     sys_printf ("echo \"Test aborted\" >> %s", LOGFILE);
 }
 
