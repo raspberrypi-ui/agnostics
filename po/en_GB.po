@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: agnostics 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-25 11:12+0100\n"
+"POT-Creation-Date: 2020-02-18 14:40+0000\n"
 "PO-Revision-Date: 2019-02-18 15:13+0000\n"
 "Last-Translator: Simon Long <simon@raspberrypi.org>\n"
 "Language-Team: English (British)\n"
@@ -16,3 +16,86 @@ msgstr ""
 "Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ../src/agnostics.c:151
+#, c-format
+msgid ""
+"<b>%s</b>\n"
+"%s"
+msgstr ""
+"<b>%s</b>\n"
+"%s"
+
+#: ../src/agnostics.c:154
+msgid "Not Run"
+msgstr "Not Run"
+
+#: ../src/agnostics.c:198
+msgid "Aborted"
+msgstr "Aborted"
+
+#: ../src/agnostics.c:202
+msgid "<span foreground=\"#FF0000\"><b>FAIL</b></span>"
+msgstr "<span foreground=\"#FF0000\"><b>FAIL</b></span>"
+
+#: ../src/agnostics.c:207
+msgid "<span foreground=\"#00FF00\"><b>PASS</b></span>"
+msgstr "<span foreground=\"#00FF00\"><b>PASS</b></span>"
+
+#: ../src/agnostics.c:231
+#, c-format
+msgid "Cancelling..."
+msgstr "Cancelling..."
+
+#: ../src/agnostics.c:233
+#, c-format
+msgid "Running %s..."
+msgstr "Running %s..."
+
+#: ../src/agnostics.c:298
+msgid "Not run"
+msgstr "Not run"
+
+#: ../src/agnostics.c:384
+msgid "Test"
+msgstr "Test"
+
+#: ../src/agnostics.c:387
+msgid "Run Test?"
+msgstr "Run Test?"
+
+#: ../src/agnostics.c:392
+msgid "Result"
+msgstr "Result"
+
+#: ../data/agnostics.ui.h:1
+msgid "Running tests..."
+msgstr "Running tests..."
+
+#: ../data/agnostics.ui.h:2
+msgid "Cancel"
+msgstr "Cancel"
+
+#: ../data/agnostics.ui.h:3 ../data/agnostics.desktop.in.h:1
+msgid "Raspberry Pi Diagnostics"
+msgstr "Raspberry Pi Diagnostics"
+
+#: ../data/agnostics.ui.h:4
+msgid "Close"
+msgstr "Close"
+
+#: ../data/agnostics.ui.h:5
+msgid "Show Log"
+msgstr "Show Log"
+
+#: ../data/agnostics.ui.h:6
+msgid "Reset"
+msgstr "Reset"
+
+#: ../data/agnostics.ui.h:7
+msgid "Run Tests"
+msgstr "Run Tests"
+
+#: ../data/agnostics.desktop.in.h:2
+msgid "Test the Raspberry Pi hardware"
+msgstr "Test the Raspberry Pi hardware"

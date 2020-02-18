@@ -228,7 +228,7 @@ static int dialog_update (gpointer data)
     if (test_name)
     {
         if (cancelled)
-            buffer = g_strdup_printf (_("Cancelled - waiting for current test to complete..."), test_name);
+            buffer = g_strdup_printf (_("Cancelling..."));
         else
             buffer = g_strdup_printf (_("Running %s..."), test_name);
         gtk_label_set_text (GTK_LABEL (status), buffer);
@@ -379,17 +379,20 @@ int main (int argc, char *argv[])
     crb = gtk_cell_renderer_toggle_new ();
     g_object_set (G_OBJECT (crb), "activatable", TRUE, NULL);
     crr = gtk_cell_renderer_text_new ();
+    g_object_set (G_OBJECT (crr), "xalign", 0.5, NULL);
 
     gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (piag_tv), 0, _("Test"), crt, "markup", PIAG_TEXT, NULL);
     gtk_tree_view_column_set_expand (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 0), TRUE);
 
     gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (piag_tv), 1, _("Run Test?"), crb, "active", PIAG_ENABLED, NULL);
-    gtk_tree_view_column_set_expand (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 1), FALSE);
     gtk_tree_view_column_set_visible (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 1), TRUE);
+    gtk_tree_view_column_set_sizing (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 1), GTK_TREE_VIEW_COLUMN_FIXED);
+    gtk_tree_view_column_set_fixed_width (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 1), 100);
 
     gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (piag_tv), 2, _("Result"), crr, "markup", PIAG_RESULT, NULL);
-    gtk_tree_view_column_set_expand (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 2), FALSE);
     gtk_tree_view_column_set_visible (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 2), FALSE);
+    gtk_tree_view_column_set_sizing (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 2), GTK_TREE_VIEW_COLUMN_FIXED);
+    gtk_tree_view_column_set_fixed_width (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 2), 100);
 
     // connect handlers
     g_signal_connect (crb, "toggled", G_CALLBACK (run_toggled), NULL);
