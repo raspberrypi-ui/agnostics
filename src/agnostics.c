@@ -388,11 +388,13 @@ int main (int argc, char *argv[])
     gtk_tree_view_column_set_visible (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 1), TRUE);
     gtk_tree_view_column_set_sizing (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 1), GTK_TREE_VIEW_COLUMN_FIXED);
     gtk_tree_view_column_set_fixed_width (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 1), 100);
+    gtk_tree_view_column_set_alignment (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 1), 0.5);
 
     gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (piag_tv), 2, _("Result"), crr, "markup", PIAG_RESULT, NULL);
     gtk_tree_view_column_set_visible (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 2), FALSE);
     gtk_tree_view_column_set_sizing (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 2), GTK_TREE_VIEW_COLUMN_FIXED);
     gtk_tree_view_column_set_fixed_width (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 2), 100);
+    gtk_tree_view_column_set_alignment (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 2), 0.5);
 
     // connect handlers
     g_signal_connect (crb, "toggled", G_CALLBACK (run_toggled), NULL);
