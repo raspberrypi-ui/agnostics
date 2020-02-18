@@ -226,48 +226,21 @@ static int dialog_update (gpointer data)
 
 static void run_test (GtkWidget *wid, gpointer data)
 {
-    GdkColor col;
+    GtkBuilder *builder;
+    builder = gtk_builder_new ();
+    gtk_builder_add_from_file (builder, PACKAGE_UI_DIR "/agnostics.ui", NULL);
 
-    // create the progress dialog
-    msg_dlg = (GtkWidget *) gtk_window_new (GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title (GTK_WINDOW (msg_dlg), "");
-    gtk_window_set_modal (GTK_WINDOW (msg_dlg), TRUE);
-    gtk_window_set_decorated (GTK_WINDOW (msg_dlg), FALSE);
-    gtk_window_set_destroy_with_parent (GTK_WINDOW (msg_dlg), TRUE);
-    gtk_window_set_skip_taskbar_hint (GTK_WINDOW (msg_dlg), TRUE);
+    msg_dlg = (GtkWidget *) gtk_builder_get_object (builder, "msg_wd");
+    status = (GtkWidget *) gtk_builder_get_object (builder, "msg_label");
+    progress = (GtkWidget *) gtk_builder_get_object (builder, "msg_prog");
+    cancel = (GtkWidget *) gtk_builder_get_object (builder, "msg_btn");
+
     gtk_window_set_transient_for (GTK_WINDOW (msg_dlg), GTK_WINDOW (piag_wd));
-    gtk_window_set_position (GTK_WINDOW (msg_dlg), GTK_WIN_POS_CENTER_ON_PARENT);
+    gtk_widget_set_name (msg_dlg, "pixbox");
 
-    // add border
-    GtkWidget *frame = gtk_frame_new (NULL);
-    gtk_container_add (GTK_CONTAINER (msg_dlg), frame);
-
-    GtkWidget *eb = gtk_event_box_new ();
-    gtk_container_add (GTK_CONTAINER (frame), eb);
-    //gdk_color_parse ("#FFFFFF", &col);
-    //gtk_widget_modify_bg (eb, GTK_STATE_NORMAL, &col);
-
-    // add container
-    GtkWidget *box = (GtkWidget *) gtk_box_new (GTK_ORIENTATION_VERTICAL, 5);
-    gtk_container_set_border_width (GTK_CONTAINER (box), 10);
-    gtk_container_add (GTK_CONTAINER (eb), box);
-
-    // add message
-    status = (GtkWidget *) gtk_label_new (_("Running tests..."));
-    gtk_label_set_width_chars (GTK_LABEL (status), 30);
-    gtk_box_pack_start (GTK_BOX (box), status, FALSE, FALSE, 5);
-
-    // add progress bar
-    progress = (GtkWidget *) gtk_progress_bar_new ();
-    gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (progress), 0.0);
-    gtk_box_pack_start (GTK_BOX (box), progress, FALSE, FALSE, 5);
-
-    // add cancel button
-    cancel = (GtkWidget *) gtk_button_new_with_label (_("Cancel"));
-    gtk_box_pack_start (GTK_BOX (box), cancel, FALSE, FALSE, 5);
     //g_signal_connect (cancel, "clicked", G_CALLBACK (on_cancel), NULL);
-
     gtk_widget_show_all (GTK_WIDGET (msg_dlg));
+    g_object_unref (builder);
 
     // add a timer to update the dialog
     gdk_threads_add_timeout (1000, dialog_update, NULL);
