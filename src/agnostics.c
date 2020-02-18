@@ -52,19 +52,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PIAG_RESULT         3
 #define PIAG_ENABLED        4
 
-#define LOGFILE "/home/pi/log.txt"
+#define LOGFILE "/home/pi/rpdiags.txt"
 
 /* Controls */
 
 static GtkWidget *piag_wd, *piag_tv, *btn_run, *btn_close, *btn_reset, *btn_log;
-static GtkWidget *msg_dlg, *status, *progress, *cancel;
+static GtkWidget *msg_wd, *msg_label, *msg_prog, *msg_btn;
 
 /* List of tests */
 
 GtkListStore *tests;
 GtkTreeModel *stests;
 
-/* Name of current test - global for inter-thread access */
+/* Inter-thread globals */
 
 gchar *test_name;
 gboolean cancelled;
@@ -152,10 +152,10 @@ static void parse_test_file (gchar *path)
             gtk_list_store_append (tests, &entry);
             gtk_list_store_set (tests, &entry, PIAG_FILE, path, PIAG_NAME, name, 
                 PIAG_TEXT, mutext, PIAG_RESULT, _("Not Run"), PIAG_ENABLED, TRUE, -1);
+            g_free (mutext);
         }
-        if (mutext) free (mutext);
-        if (name) free (name);
-        if (desc) free (desc);
+        if (name) g_free (name);
+        if (desc) g_free (desc);
 
         free (line);
         fclose (fp);
@@ -196,6 +196,7 @@ static gpointer test_thread (gpointer data)
                 if (cancelled)
                 {
                     gtk_list_store_set (tests, &iter, PIAG_RESULT, _("Aborted"), -1);
+                    sys_printf ("echo \"Test aborted\" >> %s", LOGFILE);
                 }
                 else if (status)
                 {
@@ -231,14 +232,14 @@ static int dialog_update (gpointer data)
             buffer = g_strdup_printf (_("Cancelling..."));
         else
             buffer = g_strdup_printf (_("Running %s..."), test_name);
-        gtk_label_set_text (GTK_LABEL (status), buffer);
+        gtk_label_set_text (GTK_LABEL (msg_label), buffer);
         g_free (buffer);
-        gtk_progress_bar_pulse (GTK_PROGRESS_BAR (progress));
+        gtk_progress_bar_pulse (GTK_PROGRESS_BAR (msg_prog));
         return TRUE;
     }
     else
     {
-        gtk_widget_destroy (msg_dlg);
+        gtk_widget_destroy (msg_wd);
         gtk_tree_view_column_set_visible (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 1), FALSE);
         gtk_tree_view_column_set_visible (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 2), TRUE);
         gtk_widget_show (btn_reset);
@@ -256,16 +257,16 @@ static void run_test (GtkWidget *wid, gpointer data)
     builder = gtk_builder_new ();
     gtk_builder_add_from_file (builder, PACKAGE_UI_DIR "/agnostics.ui", NULL);
 
-    msg_dlg = (GtkWidget *) gtk_builder_get_object (builder, "msg_wd");
-    status = (GtkWidget *) gtk_builder_get_object (builder, "msg_label");
-    progress = (GtkWidget *) gtk_builder_get_object (builder, "msg_prog");
-    cancel = (GtkWidget *) gtk_builder_get_object (builder, "msg_btn");
+    msg_wd = (GtkWidget *) gtk_builder_get_object (builder, "msg_wd");
+    msg_label = (GtkWidget *) gtk_builder_get_object (builder, "msg_label");
+    msg_prog = (GtkWidget *) gtk_builder_get_object (builder, "msg_prog");
+    msg_btn = (GtkWidget *) gtk_builder_get_object (builder, "msg_btn");
 
-    gtk_window_set_transient_for (GTK_WINDOW (msg_dlg), GTK_WINDOW (piag_wd));
-    gtk_widget_set_name (msg_dlg, "pixbox");
+    gtk_window_set_transient_for (GTK_WINDOW (msg_wd), GTK_WINDOW (piag_wd));
+    gtk_widget_set_name (msg_wd, "pixbox");
 
-    g_signal_connect (cancel, "clicked", G_CALLBACK (cancel_test), NULL);
-    gtk_widget_show_all (GTK_WIDGET (msg_dlg));
+    g_signal_connect (msg_btn, "clicked", G_CALLBACK (cancel_test), NULL);
+    gtk_widget_show_all (GTK_WIDGET (msg_wd));
     g_object_unref (builder);
 
     // add a timer to update the dialog
@@ -326,7 +327,6 @@ static void cancel_test (GtkWidget *wid, gpointer data)
 {
     cancelled = TRUE;
     killpg (testpid, SIGTERM);
-    sys_printf ("echo \"Test aborted\" >> %s", LOGFILE);
 }
 
 /* Handler for 'close' button */
