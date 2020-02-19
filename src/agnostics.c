@@ -33,6 +33,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <math.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <fcntl.h>
 
 #include <glib.h>
 #include <glib/gi18n.h>
@@ -186,7 +187,16 @@ static gpointer test_thread (gpointer data)
     GtkTreePath *tp;
     gchar *file;
     gboolean valid, enabled;
-    int status;
+    int status, fd;
+
+    // redirect stdout and stderr to the logfile
+    fd = open (LOGFILE, O_RDWR|O_APPEND|O_CREAT, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+    if (fd != -1)
+    {
+        dup2 (fd, STDOUT_FILENO);
+        dup2 (fd, STDERR_FILENO);
+        close (fd);
+    }
 
     // for some reason iterators don't iterate on sorted models...
     tp = gtk_tree_path_new_from_string ("0");
@@ -202,7 +212,7 @@ static gpointer test_thread (gpointer data)
 
             if (testpid == 0)
             {
-                execl ("/bin/sh", "sh", file, LOGFILE, NULL);
+                execl ("/bin/sh", "sh", file, NULL);
                 exit (0);
             }
             else
