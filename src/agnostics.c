@@ -317,9 +317,8 @@ static void run_test (GtkWidget *wid, gpointer data)
     msg_prog = (GtkWidget *) gtk_builder_get_object (builder, "msg_prog");
     msg_btn = (GtkWidget *) gtk_builder_get_object (builder, "msg_btn");
 
+    // for some reason, setting transient in the UI file doesn't work...
     gtk_window_set_transient_for (GTK_WINDOW (msg_wd), GTK_WINDOW (piag_wd));
-    gtk_widget_set_name (msg_wd, "pixbox");
-
     g_signal_connect (msg_btn, "clicked", G_CALLBACK (cancel_test), NULL);
     gtk_widget_show_all (GTK_WIDGET (msg_wd));
     g_object_unref (builder);
