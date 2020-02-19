@@ -73,7 +73,6 @@ int testpid;
 
 /* Function prototypes */
 
-static int sys_printf (const char * format, ...);
 static void log_message (int reset, const char *format, ...);
 static int find_tests (void);
 static void parse_test_file (gchar *path);
@@ -86,20 +85,7 @@ static void cancel_test (GtkWidget *wid, gpointer data);
 static void end_program (GtkWidget *wid, gpointer data);
 
 
-/* System function with printf formatting */
-
-static int sys_printf (const char * format, ...)
-{
-    char buffer[256];
-    va_list args;
-    FILE *fp;
-
-    va_start (args, format);
-    vsprintf (buffer, format, args);
-    fp = popen (buffer, "r");
-    va_end (args);
-    return pclose (fp);
-}
+/* Write supplied varargs text to log file */
 
 static void log_message (int reset, const char *format, ...)
 {
@@ -142,7 +128,13 @@ static int find_tests (void)
     }
 }
 
-/* Open the supplied test file and populate an entry in the tests list store from it */
+/* Open the supplied test file and populate an entry in the tests list store from it
+ * A test file must:
+ * a) Be a valid shell script that can be run by sh - a shebang is unnecessary and will be ignored
+ * b) Contain two metadata lines of the format #NAME=... and #DESC=...
+ * c) Return 0 if the test passes and non-zero if it fails
+ * All output a test file sends to stdout or stderr will be added to the logfile
+ */
 
 static void parse_test_file (gchar *path)
 {
@@ -336,7 +328,9 @@ static void reset_test (GtkWidget *wid, gpointer data)
 
 static void show_log (GtkWidget *wid, gpointer data)
 {
-    sys_printf ("mousepad %s &", LOGFILE);
+    char buffer[128];
+    sprintf (buffer, "mousepad %s &", LOGFILE);
+    system (buffer);
 }
 
 /* Handler for click on tree view check box */
