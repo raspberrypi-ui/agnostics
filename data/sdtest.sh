@@ -8,19 +8,22 @@ rwri=$(echo "$RES" | head -n 3 | tail -n 1 | cut -d ";" -f 5)
 rrea=$(echo "$RES" | head -n 4 | tail -n 1 | cut -d ";" -f 3)
 pass=0
 if [ "$swri" -lt 10000 ] ; then
-    echo "Sequential write speed - FAIL" >> $1
+    echo "Sequential write speed $swri (target 10000) - FAIL" >> $1
     pass=1
+else
+    echo "Sequential write speed $swri (target 10000) - PASS" >> $1
 fi
 if [ "$rwri" -lt 500 ] ; then
-    echo "Random write speed - FAIL" >> $1
+    echo "Random write speed $rwri (target 500) - FAIL" >> $1
     pass=1
+else
+    echo "Random write speed $rwri (target 500) - PASS" >> $1
 fi
 if [ "$rrea" -lt 1500 ] ; then
-    echo "Random read speed - FAIL" >> $1
+    echo "Random read speed $rrea (target 1500) - FAIL" >> $1
     pass=1
-fi
-if [ "$pass" -eq 0 ] ; then
-    echo "All tests passed" >> $1
+else
+    echo "Random read speed $rrea (target 1500) - PASS" >> $1
 fi
 rm -f ~/sd.test.file
 return $pass
