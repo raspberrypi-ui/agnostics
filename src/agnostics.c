@@ -73,21 +73,51 @@ int testpid;
 
 /* Function prototypes */
 
-static void log_message (int reset, const char *format, ...);
+static void log_init (void);
+static void log_message (const char *format, ...);
 static int find_tests (void);
 static void parse_test_file (gchar *path);
 static gpointer test_thread (gpointer data);
 static int dialog_update (gpointer data);
 static void run_test (GtkWidget *wid, gpointer data);
 static void reset_test (GtkWidget *wid, gpointer data);
+static void show_log (GtkWidget *wid, gpointer data);
 static void run_toggled (GtkCellRendererToggle *cell, gchar *path, gpointer data);
 static void cancel_test (GtkWidget *wid, gpointer data);
 static void end_program (GtkWidget *wid, gpointer data);
 
+/* Initialise log file with header */
+
+static void log_init (void)
+{
+    FILE *fp;
+    char buf[32];
+    time_t now;
+    struct tm *tstr;
+
+    // get version number of agnostics package
+    sprintf (buf, "(unknown)");
+    if (fp = popen ("apt-cache policy agnostics | grep Installed | cut -d : -f 2", "r"))
+    {
+        if (!fgets (buf, sizeof (buf) - 1, fp)) sprintf (buf, "(unknown)");
+        pclose (fp);
+    }
+
+    // get timestamp
+    now = time (NULL);
+    tstr = localtime (&now);
+
+    // write header, overwriting existing file
+    if (fp = fopen (LOGFILE, "w"))
+    {
+        fprintf (fp, "Raspberry Pi Diagnostics - version %s\n%s\n", g_strstrip (buf), asctime (tstr));
+        fclose (fp);
+    }
+}
 
 /* Write supplied varargs text to log file */
 
-static void log_message (int reset, const char *format, ...)
+static void log_message (const char *format, ...)
 {
     FILE *fp;
     va_list args;
@@ -97,7 +127,7 @@ static void log_message (int reset, const char *format, ...)
     vsprintf (buffer, format, args);
     va_end (args);
 
-    fp = fopen (LOGFILE, reset ? "w" : "a");
+    fp = fopen (LOGFILE, "a");
     fprintf (fp, "%s\n", buffer);
     fclose (fp);
 }
@@ -179,9 +209,11 @@ static gpointer test_thread (gpointer data)
     GtkTreePath *tp;
     gchar *file;
     gboolean valid, enabled;
-    int status, fd;
+    int status, fd, stdo, stde;
 
     // redirect stdout and stderr to the logfile
+    stdo = dup (STDOUT_FILENO);
+    stde = dup (STDERR_FILENO);
     fd = open (LOGFILE, O_RDWR|O_APPEND|O_CREAT, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
     if (fd != -1)
     {
@@ -199,7 +231,7 @@ static gpointer test_thread (gpointer data)
         gtk_tree_model_get (GTK_TREE_MODEL (tests), &iter, PIAG_FILE, &file, PIAG_NAME, &test_name, PIAG_ENABLED, &enabled, -1);
         if (enabled)
         {
-            log_message (FALSE, "Test : %s", test_name);
+            log_message ("Test : %s", test_name);
             testpid = fork ();
 
             if (testpid == 0)
@@ -214,17 +246,17 @@ static gpointer test_thread (gpointer data)
                 if (cancelled)
                 {
                     gtk_list_store_set (tests, &iter, PIAG_RESULT, _("Aborted"), -1);
-                    log_message (FALSE, "Test aborted\n");
+                    log_message ("Test aborted\n");
                 }
                 else if (status)
                 {
                     gtk_list_store_set (tests, &iter, PIAG_RESULT, _("<span foreground=\"#FF0000\"><b>FAIL</b></span>"), -1);
-                    log_message (FALSE, "Test FAIL\n");
+                    log_message ("Test FAIL\n");
                 }
                 else
                 {
                     gtk_list_store_set (tests, &iter, PIAG_RESULT, _("<span foreground=\"#00FF00\"><b>PASS</b></span>"), -1);
-                    log_message (FALSE, "Test PASS\n");
+                    log_message ("Test PASS\n");
                 }
             }
         }
@@ -234,6 +266,10 @@ static gpointer test_thread (gpointer data)
 
     g_free (test_name);
     test_name = NULL;
+
+    // restore stdout and stderr
+    dup2 (stdo, STDOUT_FILENO);
+    dup2 (stde, STDERR_FILENO);
 
     return NULL;
 }
@@ -272,8 +308,6 @@ static int dialog_update (gpointer data)
 static void run_test (GtkWidget *wid, gpointer data)
 {
     GtkBuilder *builder;
-    time_t now;
-    struct tm *tstr;
 
     builder = gtk_builder_new ();
     gtk_builder_add_from_file (builder, PACKAGE_UI_DIR "/agnostics.ui", NULL);
@@ -293,10 +327,8 @@ static void run_test (GtkWidget *wid, gpointer data)
     // add a timer to update the dialog
     gdk_threads_add_timeout (1000, dialog_update, NULL);
 
-    log_message (TRUE, "Raspberry Pi Diagnostics");
-    now = time (NULL);
-    tstr = localtime (&now);
-    log_message (FALSE, asctime (tstr));
+    // write log file header
+    log_init ();
 
     // launch a thread with the system call to run the tests
     cancelled = FALSE;
