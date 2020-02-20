@@ -29,21 +29,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <config.h>
 #endif
 
-#include <string.h>
-#include <math.h>
-#include <ctype.h>
-#include <stdlib.h>
 #include <fcntl.h>
+#include <sys/wait.h>
 
 #include <glib.h>
 #include <glib/gi18n.h>
-#include <glib/gstdio.h>
 #include <gtk/gtk.h>
-#include <gdk/gdkx.h>
-
-#include <sys/wait.h>
-
-#include <libintl.h>
 
 /* Columns in tree store */
 
@@ -57,8 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /* Controls */
 
-static GtkWidget *piag_wd, *piag_tv, *btn_run, *btn_close, *btn_reset, *btn_log;
-static GtkWidget *msg_wd, *msg_label, *msg_prog, *msg_btn;
+GtkWidget *piag_wd, *piag_tv, *btn_run, *btn_close, *btn_reset, *btn_log, *msg_wd, *msg_label, *msg_prog, *msg_btn;
 
 /* List of tests */
 
@@ -92,15 +82,15 @@ static void set_controls (int end);
 static void log_init (void)
 {
     FILE *fp;
-    char buf[32];
+    char buffer[32];
     time_t now;
     struct tm *tstr;
 
     // get version number of agnostics package
-    sprintf (buf, "(unknown)");
+    sprintf (buffer, "(unknown)");
     if (fp = popen ("apt-cache policy agnostics | grep Installed | cut -d : -f 2", "r"))
     {
-        if (!fgets (buf, sizeof (buf) - 1, fp)) sprintf (buf, "(unknown)");
+        if (!fgets (buffer, sizeof (buffer) - 1, fp)) sprintf (buffer, "(unknown)");
         pclose (fp);
     }
 
@@ -111,7 +101,7 @@ static void log_init (void)
     // write header, overwriting existing file
     if (fp = fopen (LOGFILE, "w"))
     {
-        fprintf (fp, "Raspberry Pi Diagnostics - version %s\n%s\n", g_strstrip (buf), asctime (tstr));
+        fprintf (fp, "Raspberry Pi Diagnostics - version %s\n%s\n", g_strstrip (buffer), asctime (tstr));
         fclose (fp);
     }
 }
@@ -146,6 +136,7 @@ static int find_tests (void)
     {
         while ((name = g_dir_read_name (data_dir)) != NULL)
         {
+            // only process files with a .sh extension
             if (!g_strcmp0 (name + strlen (name) - 3, ".sh"))
             {
                 path = g_strdup_printf ("%s/%s", PACKAGE_DATA_DIR, name);
@@ -154,6 +145,8 @@ static int find_tests (void)
             }
         }
         g_dir_close (data_dir);
+
+        // alphasort the raw tree into a sorted tree structure
         stests = gtk_tree_model_sort_new_with_model (GTK_TREE_MODEL (tests));
         gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (stests), PIAG_NAME, GTK_SORT_ASCENDING);
     }
@@ -170,7 +163,7 @@ static int find_tests (void)
 static void parse_test_file (gchar *path)
 {
     FILE *fp;
-    char *line = NULL, *name = NULL, *desc = NULL, *mutext = NULL;
+    char *line = NULL, *name, *desc, *mutext;
     size_t len = 0;
     GtkTreeIter entry;
 
@@ -237,13 +230,19 @@ static gpointer test_thread (gpointer data)
 
             if (testpid == 0)
             {
+                // new child process - run the test script
                 execl ("/bin/sh", "sh", file, NULL);
+                g_free (file);
                 exit (0);
             }
             else
             {
+                // original process - set the process group for the new process so all subprocesses can be killed
                 setpgid (testpid, testpid);
+
+                // wait for child process to end
                 wait (&status);
+
                 if (cancelled)
                 {
                     gtk_list_store_set (tests, &iter, PIAG_RESULT, _("Aborted"), -1);
@@ -341,9 +340,11 @@ static void reset_test (GtkWidget *wid, gpointer data)
 
 static void show_log (GtkWidget *wid, gpointer data)
 {
-    char buffer[128];
-    sprintf (buffer, "mousepad %s &", LOGFILE);
+    char *buffer;
+
+    buffer = g_strdup_printf ("mousepad %s &", LOGFILE);
     system (buffer);
+    g_free (buffer);
 }
 
 /* Handler for click on tree view check box */
@@ -353,6 +354,7 @@ static void run_toggled (GtkCellRendererToggle *cell, gchar *path, gpointer data
     GtkTreeIter iter, siter;
     gboolean val;
 
+    // find iterator in tests which corresponds to row clicked
     gtk_tree_model_get_iter_from_string (stests, &siter, path);
     gtk_tree_model_sort_convert_iter_to_child_iter (GTK_TREE_MODEL_SORT (stests), &iter, &siter);
     gtk_tree_model_get (GTK_TREE_MODEL (tests), &iter, PIAG_ENABLED, &val, -1);
@@ -363,8 +365,9 @@ static void run_toggled (GtkCellRendererToggle *cell, gchar *path, gpointer data
 
 static void cancel_test (GtkWidget *wid, gpointer data)
 {
-    cancelled = TRUE;
+    // kill everything in the process group to end programs called from the shell script
     killpg (testpid, SIGTERM);
+    cancelled = TRUE;
 }
 
 /* Handler for 'close' button */
@@ -424,8 +427,6 @@ int main (int argc, char *argv[])
     msg_btn = (GtkWidget *) gtk_builder_get_object (builder, "msg_btn");
     g_object_unref (builder);
 
-    gtk_window_set_default_size (GTK_WINDOW (piag_wd), 500, 350);
-
     // set up tree view
     gtk_tree_view_set_model (GTK_TREE_VIEW (piag_tv), GTK_TREE_MODEL (stests));
 
@@ -459,6 +460,7 @@ int main (int argc, char *argv[])
 
     set_controls (0);
 
+    gtk_window_set_default_size (GTK_WINDOW (piag_wd), 500, 350);
     gtk_widget_show (piag_wd);
 
     // main loop
