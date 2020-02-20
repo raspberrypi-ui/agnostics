@@ -85,6 +85,7 @@ static void show_log (GtkWidget *wid, gpointer data);
 static void run_toggled (GtkCellRendererToggle *cell, gchar *path, gpointer data);
 static void cancel_test (GtkWidget *wid, gpointer data);
 static void end_program (GtkWidget *wid, gpointer data);
+static void set_controls (int end);
 
 /* Initialise log file with header */
 
@@ -293,12 +294,8 @@ static int dialog_update (gpointer data)
     }
     else
     {
-        gtk_widget_destroy (msg_wd);
-        gtk_tree_view_column_set_visible (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 1), FALSE);
-        gtk_tree_view_column_set_visible (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 2), TRUE);
-        gtk_widget_show (btn_reset);
-        gtk_widget_show (btn_log);
-        gtk_widget_hide (btn_run);
+        gtk_widget_hide (msg_wd);
+        set_controls (1);
         return FALSE;
     }
 }
@@ -307,21 +304,9 @@ static int dialog_update (gpointer data)
 
 static void run_test (GtkWidget *wid, gpointer data)
 {
-    GtkBuilder *builder;
-
-    builder = gtk_builder_new ();
-    gtk_builder_add_from_file (builder, PACKAGE_UI_DIR "/agnostics.ui", NULL);
-
-    msg_wd = (GtkWidget *) gtk_builder_get_object (builder, "msg_wd");
-    msg_label = (GtkWidget *) gtk_builder_get_object (builder, "msg_label");
-    msg_prog = (GtkWidget *) gtk_builder_get_object (builder, "msg_prog");
-    msg_btn = (GtkWidget *) gtk_builder_get_object (builder, "msg_btn");
-
-    // for some reason, setting transient in the UI file doesn't work...
+    // setting transient in the UI file doesn't work - but then, logically, it can't...
     gtk_window_set_transient_for (GTK_WINDOW (msg_wd), GTK_WINDOW (piag_wd));
-    g_signal_connect (msg_btn, "clicked", G_CALLBACK (cancel_test), NULL);
     gtk_widget_show_all (GTK_WIDGET (msg_wd));
-    g_object_unref (builder);
 
     // add a timer to update the dialog
     gdk_threads_add_timeout (1000, dialog_update, NULL);
@@ -341,18 +326,15 @@ static void reset_test (GtkWidget *wid, gpointer data)
     GtkTreeIter iter;
     gboolean valid;
 
-    gtk_tree_view_column_set_visible (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 1), TRUE);
-    gtk_tree_view_column_set_visible (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 2), FALSE);
-    gtk_widget_hide (btn_reset);
-    gtk_widget_hide (btn_log);
-    gtk_widget_show (btn_run);
-
+    // reset test status in list store
     valid = gtk_tree_model_get_iter_first (GTK_TREE_MODEL (tests), &iter);
     while (valid)
     {
         gtk_list_store_set (tests, &iter, PIAG_RESULT, _("Not run"), -1);
         valid = gtk_tree_model_iter_next (GTK_TREE_MODEL (tests), &iter);
     }
+
+    set_controls (0);
 }
 
 /* Handler for 'show log' button */
@@ -392,6 +374,17 @@ static void end_program (GtkWidget *wid, gpointer data)
     gtk_main_quit ();
 }
 
+/* Function to redraw controls for each state */
+
+static void set_controls (int end)
+{
+    gtk_tree_view_column_set_visible (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 1), end == 0);
+    gtk_tree_view_column_set_visible (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 2), end == 1);
+    gtk_widget_set_visible (btn_reset, end == 1);
+    gtk_widget_set_visible (btn_log, end == 1);
+    gtk_widget_set_visible (btn_run, end == 0);
+}
+
 /* The dialog... */
 
 int main (int argc, char *argv[])
@@ -414,7 +407,7 @@ int main (int argc, char *argv[])
     tests = gtk_list_store_new (5, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_BOOLEAN);
     find_tests ();
 
-    // build the UI
+    // load UI elements
     builder = gtk_builder_new ();
     gtk_builder_add_from_file (builder, PACKAGE_UI_DIR "/agnostics.ui", NULL);
 
@@ -425,6 +418,12 @@ int main (int argc, char *argv[])
     btn_reset = (GtkWidget *) gtk_builder_get_object (builder, "btn_reset");
     btn_log = (GtkWidget *) gtk_builder_get_object (builder, "btn_log");
 
+    msg_wd = (GtkWidget *) gtk_builder_get_object (builder, "msg_wd");
+    msg_label = (GtkWidget *) gtk_builder_get_object (builder, "msg_label");
+    msg_prog = (GtkWidget *) gtk_builder_get_object (builder, "msg_prog");
+    msg_btn = (GtkWidget *) gtk_builder_get_object (builder, "msg_btn");
+    g_object_unref (builder);
+
     gtk_window_set_default_size (GTK_WINDOW (piag_wd), 500, 350);
 
     // set up tree view
@@ -432,22 +431,19 @@ int main (int argc, char *argv[])
 
     crt = gtk_cell_renderer_text_new ();
     g_object_set (G_OBJECT (crt), "wrap-width", 350, "wrap-mode", PANGO_WRAP_WORD_CHAR, NULL);
-    crb = gtk_cell_renderer_toggle_new ();
-    g_object_set (G_OBJECT (crb), "activatable", TRUE, NULL);
-    crr = gtk_cell_renderer_text_new ();
-    g_object_set (G_OBJECT (crr), "xalign", 0.5, NULL);
-
     gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (piag_tv), 0, _("Test"), crt, "markup", PIAG_TEXT, NULL);
     gtk_tree_view_column_set_expand (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 0), TRUE);
 
+    crb = gtk_cell_renderer_toggle_new ();
+    g_object_set (G_OBJECT (crb), "activatable", TRUE, NULL);
     gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (piag_tv), 1, _("Run Test?"), crb, "active", PIAG_ENABLED, NULL);
-    gtk_tree_view_column_set_visible (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 1), TRUE);
     gtk_tree_view_column_set_sizing (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 1), GTK_TREE_VIEW_COLUMN_FIXED);
     gtk_tree_view_column_set_fixed_width (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 1), 100);
     gtk_tree_view_column_set_alignment (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 1), 0.5);
 
+    crr = gtk_cell_renderer_text_new ();
+    g_object_set (G_OBJECT (crr), "xalign", 0.5, NULL);
     gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (piag_tv), 2, _("Result"), crr, "markup", PIAG_RESULT, NULL);
-    gtk_tree_view_column_set_visible (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 2), FALSE);
     gtk_tree_view_column_set_sizing (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 2), GTK_TREE_VIEW_COLUMN_FIXED);
     gtk_tree_view_column_set_fixed_width (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 2), 100);
     gtk_tree_view_column_set_alignment (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 2), 0.5);
@@ -459,12 +455,11 @@ int main (int argc, char *argv[])
     g_signal_connect (btn_run, "clicked", G_CALLBACK (run_test), NULL);
     g_signal_connect (btn_reset, "clicked", G_CALLBACK (reset_test), NULL);
     g_signal_connect (btn_log, "clicked", G_CALLBACK (show_log), NULL);
+    g_signal_connect (msg_btn, "clicked", G_CALLBACK (cancel_test), NULL);
 
-    gtk_widget_hide (btn_reset);
-    gtk_widget_hide (btn_log);
+    set_controls (0);
 
     gtk_widget_show (piag_wd);
-    g_object_unref (builder);
 
     // main loop
     gtk_main ();
