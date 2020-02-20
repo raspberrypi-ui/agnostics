@@ -29,6 +29,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <config.h>
 #endif
 
+#include <stdio.h>
 #include <fcntl.h>
 #include <sys/wait.h>
 
@@ -118,9 +119,11 @@ static void log_message (const char *format, ...)
     vsprintf (buffer, format, args);
     va_end (args);
 
-    fp = fopen (LOGFILE, "a");
-    fprintf (fp, "%s\n", buffer);
-    fclose (fp);
+    if (fp = fopen (LOGFILE, "a"))
+    {
+        fprintf (fp, "%s\n", buffer);
+        fclose (fp);
+    }
 }
 
 /* Find all test files in the data directory and add them to the tests list store */
@@ -152,7 +155,9 @@ static int find_tests (void)
     }
 }
 
-/* Open the supplied test file and populate an entry in the tests list store from it
+/* Open the supplied test file and populate an entry in the tests list store from it */
+
+/*
  * A test file must:
  * a) Be a valid shell script that can be run by sh - a shebang is unnecessary and will be ignored
  * b) Contain two metadata lines of the format #NAME=... and #DESC=...
@@ -163,8 +168,8 @@ static int find_tests (void)
 static void parse_test_file (gchar *path)
 {
     FILE *fp;
-    char *line = NULL, *name, *desc, *mutext;
-    size_t len = 0;
+    char *line, *name, *desc, *mutext;
+    size_t len;
     GtkTreeIter entry;
 
     fp = fopen (path, "rb");
@@ -172,26 +177,32 @@ static void parse_test_file (gchar *path)
     {
         name = NULL;
         desc = NULL;
+        line = NULL;
+        len = 0;
         while (getline (&line, &len, fp) != -1)
         {
             if (!strncmp (line, "#NAME=", 6)) name = g_strdup (line + 6);
             if (!strncmp (line, "#DESC=", 6)) desc = g_strdup (line + 6);
         }
+        free (line);
+        fclose (fp);
+
         if (name && desc)
         {
+            // trim the newlines
             *(name + strlen (name) - 1) = 0;
             *(desc + strlen (desc) - 1) = 0;
+
+            // create marked-up display text and add to list store
             mutext = g_strdup_printf (_("<b>%s</b>\n%s"), name, desc);
             gtk_list_store_append (tests, &entry);
             gtk_list_store_set (tests, &entry, PIAG_FILE, path, PIAG_NAME, name, 
                 PIAG_TEXT, mutext, PIAG_RESULT, _("Not Run"), PIAG_ENABLED, TRUE, -1);
             g_free (mutext);
         }
+
         if (name) g_free (name);
         if (desc) g_free (desc);
-
-        free (line);
-        fclose (fp);
     }
 }
 
@@ -204,6 +215,9 @@ static gpointer test_thread (gpointer data)
     gchar *file;
     gboolean valid, enabled;
     int status, fd, stdo, stde;
+
+    // write log file header
+    log_init ();
 
     // redirect stdout and stderr to the logfile
     stdo = dup (STDOUT_FILENO);
@@ -310,11 +324,9 @@ static void run_test (GtkWidget *wid, gpointer data)
     // add a timer to update the dialog
     gdk_threads_add_timeout (1000, dialog_update, NULL);
 
-    // write log file header
-    log_init ();
-
     // launch a thread with the system call to run the tests
     cancelled = FALSE;
+    test_name = NULL;
     g_thread_new (NULL, test_thread, NULL);
 }
 
@@ -410,7 +422,7 @@ int main (int argc, char *argv[])
     tests = gtk_list_store_new (5, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_BOOLEAN);
     find_tests ();
 
-    // load UI elements
+    // load widgets from UI file
     builder = gtk_builder_new ();
     gtk_builder_add_from_file (builder, PACKAGE_UI_DIR "/agnostics.ui", NULL);
 
