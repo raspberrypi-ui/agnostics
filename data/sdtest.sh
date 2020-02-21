@@ -12,6 +12,7 @@ do
     pass=0
     if [ "$swri" -lt 10000 ] ; then
         echo "Sequential write speed $swri kb/s (target 10000) - FAIL"
+        echo "Note that sequential write speed declines over time as a card is used - your card may require reformatting"
         pass=1
     else
         echo "Sequential write speed $swri kb/s (target 10000) - PASS"
