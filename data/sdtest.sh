@@ -25,5 +25,5 @@ if [ "$rrea" -lt 1500 ] ; then
 else
     echo "Random read speed $rrea (target 1500) - PASS"
 fi
-rm -f ~/sd.test.file
+rm -f /var/tmp/sd.test.file
 return $pass
