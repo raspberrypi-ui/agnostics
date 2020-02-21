@@ -113,10 +113,11 @@
             <property name="layout_style">start</property>
             <child>
               <object class="GtkButton" id="btn_close">
-                <property name="label" translatable="yes">Close</property>
+                <property name="label" translatable="yes">_Close</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_underline">True</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -126,10 +127,11 @@
             </child>
             <child>
               <object class="GtkButton" id="btn_log">
-                <property name="label" translatable="yes">Show Log</property>
+                <property name="label" translatable="yes">Show _Log</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_underline">True</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -140,10 +142,11 @@
             </child>
             <child>
               <object class="GtkButton" id="btn_reset">
-                <property name="label" translatable="yes">Reset</property>
+                <property name="label" translatable="yes">Re_set</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_underline">True</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -154,10 +157,11 @@
             </child>
             <child>
               <object class="GtkButton" id="btn_run">
-                <property name="label" translatable="yes">Run Tests</property>
+                <property name="label" translatable="yes">_Run Tests</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_underline">True</property>
               </object>
               <packing>
                 <property name="expand">True</property>

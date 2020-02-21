@@ -81,20 +81,20 @@ msgid "Raspberry Pi Diagnostics"
 msgstr "Raspberry Pi Diagnostics"
 
 #: ../data/agnostics.ui.h:4
-msgid "Close"
-msgstr "Close"
+msgid "_Close"
+msgstr "_Close"
 
 #: ../data/agnostics.ui.h:5
-msgid "Show Log"
-msgstr "Show Log"
+msgid "Show _Log"
+msgstr "Show _Log"
 
 #: ../data/agnostics.ui.h:6
-msgid "Reset"
-msgstr "Reset"
+msgid "Re_set"
+msgstr "Re_set"
 
 #: ../data/agnostics.ui.h:7
-msgid "Run Tests"
-msgstr "Run Tests"
+msgid "_Run Tests"
+msgstr "_Run Tests"
 
 #: ../data/agnostics.desktop.in.h:2
 msgid "Test the Raspberry Pi hardware"
