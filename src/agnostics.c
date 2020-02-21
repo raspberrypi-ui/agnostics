@@ -45,8 +45,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PIAG_RESULT         3
 #define PIAG_ENABLED        4
 
-#define LOGFILE "/home/pi/rpdiags.txt"
-
 /* Controls */
 
 GtkWidget *piag_wd, *piag_tv, *btn_run, *btn_close, *btn_reset, *btn_log, *msg_wd, *msg_label, *msg_prog, *msg_btn;
@@ -61,6 +59,10 @@ GtkTreeModel *stests;
 gchar *test_name;
 gboolean cancelled;
 int testpid;
+
+/* Path to log file */
+
+gchar *logfile;
 
 /* Function prototypes */
 
@@ -100,7 +102,7 @@ static void log_init (void)
     tstr = localtime (&now);
 
     // write header, overwriting existing file
-    if (fp = fopen (LOGFILE, "w"))
+    if (fp = fopen (logfile, "w"))
     {
         fprintf (fp, "Raspberry Pi Diagnostics - version %s\n%s\n", g_strstrip (buffer), asctime (tstr));
         fclose (fp);
@@ -119,7 +121,7 @@ static void log_message (const char *format, ...)
     vsprintf (buffer, format, args);
     va_end (args);
 
-    if (fp = fopen (LOGFILE, "a"))
+    if (fp = fopen (logfile, "a"))
     {
         fprintf (fp, "%s\n", buffer);
         fclose (fp);
@@ -222,7 +224,7 @@ static gpointer test_thread (gpointer data)
     // redirect stdout and stderr to the logfile
     stdo = dup (STDOUT_FILENO);
     stde = dup (STDERR_FILENO);
-    fd = open (LOGFILE, O_RDWR|O_APPEND|O_CREAT, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+    fd = open (logfile, O_RDWR|O_APPEND|O_CREAT, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
     if (fd != -1)
     {
         dup2 (fd, STDOUT_FILENO);
@@ -354,7 +356,7 @@ static void show_log (GtkWidget *wid, gpointer data)
 {
     char *buffer;
 
-    buffer = g_strdup_printf ("mousepad %s &", LOGFILE);
+    buffer = g_strdup_printf ("mousepad %s &", logfile);
     system (buffer);
     g_free (buffer);
 }
@@ -398,6 +400,8 @@ static void set_controls (int end)
     gtk_widget_set_visible (btn_reset, end == 1);
     gtk_widget_set_visible (btn_log, end == 1);
     gtk_widget_set_visible (btn_run, end == 0);
+    if (end) gtk_widget_grab_focus (btn_reset);
+    else gtk_widget_grab_focus (btn_run);
 }
 
 /* The dialog... */
@@ -421,6 +425,9 @@ int main (int argc, char *argv[])
     // find test files in data directory
     tests = gtk_list_store_new (5, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_BOOLEAN);
     find_tests ();
+
+    // get path to log file in user's home directory
+    logfile = g_build_filename (g_get_home_dir (), "rpdiags.txt", NULL);
 
     // load widgets from UI file
     builder = gtk_builder_new ();
@@ -478,5 +485,6 @@ int main (int argc, char *argv[])
     // main loop
     gtk_main ();
 
+    g_free (logfile);
     return 0;
 }
