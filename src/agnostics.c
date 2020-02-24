@@ -170,7 +170,7 @@ static int find_tests (void)
 static void parse_test_file (gchar *path)
 {
     FILE *fp;
-    char *line, *name, *desc, *mutext;
+    char *line, *name, *desc, *mutext, *cdesc;
     size_t len;
     GtkTreeIter entry;
 
@@ -194,13 +194,15 @@ static void parse_test_file (gchar *path)
             // trim the newlines
             *(name + strlen (name) - 1) = 0;
             *(desc + strlen (desc) - 1) = 0;
+            cdesc = g_strcompress (desc);
 
             // create marked-up display text and add to list store
-            mutext = g_strdup_printf (_("<b>%s</b>\n%s"), name, desc);
+            mutext = g_strdup_printf (_("<b>%s</b>\n%s"), name, cdesc);
             gtk_list_store_append (tests, &entry);
             gtk_list_store_set (tests, &entry, PIAG_FILE, path, PIAG_NAME, name, 
                 PIAG_TEXT, mutext, PIAG_RESULT, _("Not Run"), PIAG_ENABLED, TRUE, -1);
             g_free (mutext);
+            g_free (cdesc);
         }
 
         if (name) g_free (name);
@@ -450,7 +452,7 @@ int main (int argc, char *argv[])
     gtk_tree_view_set_model (GTK_TREE_VIEW (piag_tv), GTK_TREE_MODEL (stests));
 
     crt = gtk_cell_renderer_text_new ();
-    g_object_set (G_OBJECT (crt), "wrap-width", 350, "wrap-mode", PANGO_WRAP_WORD_CHAR, NULL);
+    g_object_set (G_OBJECT (crt), "wrap-width", 380, "wrap-mode", PANGO_WRAP_WORD_CHAR, NULL);
     gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (piag_tv), 0, _("Test"), crt, "markup", PIAG_TEXT, NULL);
     gtk_tree_view_column_set_expand (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 0), TRUE);
 

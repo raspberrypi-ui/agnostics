@@ -1,6 +1,6 @@
 #!/bin/bash
 #NAME=SD Card Speed Test
-#DESC=This test determines whether an SD card can read and write data fast enough to provide adequate performance in a Raspberry Pi.
+#DESC=Determines whether an SD card can read and write data fast enough to provide adequate performance.\n\nShould be run on a new or newly-formatted SD card.
 for i in 1 2 3
 do
     echo "Run" $i
