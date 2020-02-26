@@ -1,3 +1,9 @@
+agnostics (0.2) buster; urgency=medium
+
+  * Correct version of GTK in dependencies
+
+ -- Simon Long <simon@raspberrypi.org>  Wed, 26 Feb 2020 08:16:20 +0000
+
 agnostics (0.1) buster; urgency=low
 
   * Initial release
