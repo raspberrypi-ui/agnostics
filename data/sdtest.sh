@@ -11,11 +11,11 @@ do
     rrea=$(echo "$RES" | head -n 4 | tail -n 1 | cut -d ";" -f 3)
     pass=0
     if [ "$swri" -lt 10000 ] ; then
-        echo "Sequential write speed $swri kb/s (target 10000) - FAIL"
+        echo "Sequential write speed $swri KB/sec (target 10000) - FAIL"
         echo "Note that sequential write speed declines over time as a card is used - your card may require reformatting"
         pass=1
     else
-        echo "Sequential write speed $swri kb/s (target 10000) - PASS"
+        echo "Sequential write speed $swri KB/sec (target 10000) - PASS"
     fi
     if [ "$rwri" -lt 500 ] ; then
         echo "Random write speed $rwri IOPS (target 500) - FAIL"
