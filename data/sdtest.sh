@@ -1,4 +1,4 @@
-#!/bin/bash
+# Shebang lines are ignored by agnostics - use 'sh sdtest.sh' to run this script manually.
 #NAME=SD Card Speed Test
 #DESC=Determines whether an SD card can read and write data fast enough to provide adequate performance.\n\nShould be run on a new or newly-formatted SD card.
 for i in 1 2 3
