@@ -14,5 +14,7 @@
 
 # Put code that performs the test here.
 
+# agnostics captures all output the test script sends to stdout and stderr
+
 # Script must return 0 if test passed, 1 if test failed.
 # return $pass
