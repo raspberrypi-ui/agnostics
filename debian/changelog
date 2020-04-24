@@ -1,3 +1,9 @@
+agnostics (0.3) buster; urgency=medium
+
+  * Restrict memory usage in SD card test
+
+ -- Simon Long <simon@raspberrypi.com>  Fri, 24 Apr 2020 10:38:54 +0100
+
 agnostics (0.2) buster; urgency=medium
 
   * Correct version of GTK in dependencies
