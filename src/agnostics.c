@@ -259,7 +259,7 @@ static gpointer test_thread (gpointer data)
                 setpgid (testpid, testpid);
 
                 // wait for child process to end
-                wait (&status);
+                waitpid (testpid, &status, 0);
 
                 if (cancelled)
                 {

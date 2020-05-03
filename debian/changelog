@@ -1,3 +1,9 @@
+agnostics (0.4) buster; urgency=medium
+
+  * Wait for specified PID while test is running
+
+ -- Simon Long <simon@raspberrypi.com>  Sun, 03 May 2020 18:42:14 +0100
+
 agnostics (0.3) buster; urgency=medium
 
   * Restrict memory usage in SD card test
