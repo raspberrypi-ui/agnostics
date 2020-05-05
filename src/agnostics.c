@@ -57,7 +57,7 @@ GtkTreeModel *stests;
 /* Inter-thread globals */
 
 gchar *test_name;
-gboolean cancelled;
+gboolean running, cancelled;
 int testpid;
 
 /* Path to log file */
@@ -284,6 +284,7 @@ static gpointer test_thread (gpointer data)
 
     g_free (test_name);
     test_name = NULL;
+    running = FALSE;
 
     // restore stdout and stderr
     dup2 (stdo, STDOUT_FILENO);
@@ -298,12 +299,12 @@ static int dialog_update (gpointer data)
 {
     gchar *buffer;
 
-    if (test_name)
+    if (running)
     {
         if (cancelled)
             buffer = g_strdup_printf (_("Cancelling..."));
         else
-            buffer = g_strdup_printf (_("Running %s..."), test_name);
+            buffer = g_strdup_printf (_("Running %s..."), test_name ? test_name : _("tests"));
         gtk_label_set_text (GTK_LABEL (msg_label), buffer);
         g_free (buffer);
         gtk_progress_bar_pulse (GTK_PROGRESS_BAR (msg_prog));
@@ -331,6 +332,7 @@ static void run_test (GtkWidget *wid, gpointer data)
     // launch a thread with the system call to run the tests
     cancelled = FALSE;
     test_name = NULL;
+    running = TRUE;
     g_thread_new (NULL, test_thread, NULL);
 }
 
