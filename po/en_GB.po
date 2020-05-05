@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: agnostics 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-02-18 14:40+0000\n"
+"POT-Creation-Date: 2020-05-05 14:16+0100\n"
 "PO-Revision-Date: 2019-02-18 15:13+0000\n"
 "Last-Translator: Simon Long <simon@raspberrypi.org>\n"
 "Language-Team: English (British)\n"
@@ -17,7 +17,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ../src/agnostics.c:151
+#. create marked-up display text and add to list store
+#: ../src/agnostics.c:200
 #, c-format
 msgid ""
 "<b>%s</b>\n"
@@ -26,45 +27,49 @@ msgstr ""
 "<b>%s</b>\n"
 "%s"
 
-#: ../src/agnostics.c:154
+#: ../src/agnostics.c:203
 msgid "Not Run"
 msgstr "Not Run"
 
-#: ../src/agnostics.c:198
+#: ../src/agnostics.c:266
 msgid "Aborted"
 msgstr "Aborted"
 
-#: ../src/agnostics.c:202
+#: ../src/agnostics.c:271
 msgid "<span foreground=\"#FF0000\"><b>FAIL</b></span>"
 msgstr "<span foreground=\"#FF0000\"><b>FAIL</b></span>"
 
-#: ../src/agnostics.c:207
+#: ../src/agnostics.c:276
 msgid "<span foreground=\"#00FF00\"><b>PASS</b></span>"
 msgstr "<span foreground=\"#00FF00\"><b>PASS</b></span>"
 
-#: ../src/agnostics.c:231
+#: ../src/agnostics.c:305
 #, c-format
 msgid "Cancelling..."
 msgstr "Cancelling..."
 
-#: ../src/agnostics.c:233
+#: ../src/agnostics.c:307
 #, c-format
 msgid "Running %s..."
 msgstr "Running %s..."
 
-#: ../src/agnostics.c:298
+#: ../src/agnostics.c:307
+msgid "tests"
+msgstr "tests"
+
+#: ../src/agnostics.c:350
 msgid "Not run"
 msgstr "Not run"
 
-#: ../src/agnostics.c:384
+#: ../src/agnostics.c:458
 msgid "Test"
 msgstr "Test"
 
-#: ../src/agnostics.c:387
+#: ../src/agnostics.c:463
 msgid "Run Test?"
 msgstr "Run Test?"
 
-#: ../src/agnostics.c:392
+#: ../src/agnostics.c:470
 msgid "Result"
 msgstr "Result"
 
