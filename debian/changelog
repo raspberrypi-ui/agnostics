@@ -1,3 +1,9 @@
+agnostics (0.5) buster; urgency=medium
+
+  * Use system text file association to open log file
+
+ -- Simon Long <simon@raspberrypi.com>  Fri, 18 Sep 2020 11:27:04 +0100
+
 agnostics (0.4) buster; urgency=medium
 
   * Wait for specified PID while test is running

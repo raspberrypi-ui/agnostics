@@ -358,11 +358,11 @@ static void reset_test (GtkWidget *wid, gpointer data)
 
 static void show_log (GtkWidget *wid, gpointer data)
 {
-    char *buffer;
-
-    buffer = g_strdup_printf ("mousepad %s &", logfile);
-    system (buffer);
-    g_free (buffer);
+    if (fork () == 0)
+    {
+        execl ("/usr/bin/xdg-open", "xdg-open", logfile, NULL);
+        exit (0);
+    }
 }
 
 /* Handler for click on tree view check box */
