@@ -1,3 +1,9 @@
 This is an application to run tests on Raspberry Pi hardware.
 
 To build, run ./autogen.sh, then ./configure and make.
+
+Dependencies you may also need to install (using `sudo apt-get install <packagename> [<package2name>...]`):
+* libglib2.0-dev
+* libtool
+* intltool
+* libgtk-3-dev **(>=3.24)**
