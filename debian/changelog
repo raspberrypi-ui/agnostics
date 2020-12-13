@@ -1,3 +1,9 @@
+agnostics (0.6) buster; urgency=medium
+
+  * Added Slovak translation
+
+ -- Simon Long <simon@raspberrypi.com>  Sun, 13 Dec 2020 12:16:59 +0000
+
 agnostics (0.5) buster; urgency=medium
 
   * Use system text file association to open log file
