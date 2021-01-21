@@ -434,8 +434,7 @@ int main (int argc, char *argv[])
     logfile = g_build_filename (g_get_home_dir (), "rpdiags.txt", NULL);
 
     // load widgets from UI file
-    builder = gtk_builder_new ();
-    gtk_builder_add_from_file (builder, PACKAGE_UI_DIR "/agnostics.ui", NULL);
+    builder = gtk_builder_new_from_file (PACKAGE_UI_DIR "/agnostics.ui");
 
     piag_wd = (GtkWidget *) gtk_builder_get_object (builder, "piag_wd");
     piag_tv = (GtkWidget *) gtk_builder_get_object (builder, "piag_tv");

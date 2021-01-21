@@ -40,5 +40,5 @@ autoreconf.*
 debian/files
 debian/debhelper-build-stamp
 debian/.debhelper/
-debian/piagnostics/
-piagnostics
+debian/agnostics/
+agnostics
