@@ -2,65 +2,94 @@
 <!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <object class="GtkWindow" id="msg_wd">
+  <object class="GtkWindow" id="modal">
     <property name="name">pixbox</property>
     <property name="can_focus">False</property>
     <property name="modal">True</property>
     <property name="window_position">center-on-parent</property>
+    <property name="default_width">340</property>
     <property name="destroy_with_parent">True</property>
+    <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
+    <property name="skip_pager_hint">True</property>
     <property name="decorated">False</property>
-    <child type="titlebar">
+    <child>
       <placeholder/>
     </child>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_left">10</property>
-        <property name="margin_right">10</property>
-        <property name="margin_top">10</property>
-        <property name="margin_bottom">10</property>
+        <property name="margin_left">20</property>
+        <property name="margin_right">20</property>
+        <property name="margin_top">20</property>
+        <property name="margin_bottom">20</property>
         <property name="orientation">vertical</property>
-        <property name="spacing">5</property>
+        <property name="spacing">20</property>
         <child>
-          <object class="GtkLabel" id="msg_label">
+          <object class="GtkLabel" id="modal_msg">
+            <property name="width_request">300</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="label" translatable="yes">Running tests...</property>
-            <property name="use_markup">True</property>
-            <property name="width_chars">30</property>
+            <property name="label" translatable="yes">label</property>
+            <property name="wrap">True</property>
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="padding">5</property>
+            <property name="fill">True</property>
             <property name="position">0</property>
           </packing>
         </child>
         <child>
-          <object class="GtkProgressBar" id="msg_prog">
+          <object class="GtkProgressBar" id="modal_pb">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="padding">5</property>
+            <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="msg_btn">
-            <property name="label" translatable="yes">Cancel</property>
+          <object class="GtkBox" id="modal_buttons">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can_focus">False</property>
+            <property name="spacing">20</property>
+            <child>
+              <object class="GtkButton" id="modal_cancel">
+                <property name="label" translatable="yes">_Cancel</property>
+                <property name="width_request">100</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_underline">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="modal_ok">
+                <property name="label" translatable="yes">_OK</property>
+                <property name="width_request">100</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_underline">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">False</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="padding">5</property>
+            <property name="fill">True</property>
             <property name="position">2</property>
           </packing>
         </child>

@@ -323,8 +323,9 @@ static int dialog_update (gpointer data)
 static void run_test (GtkWidget *wid, gpointer data)
 {
     // setting transient in the UI file doesn't work - but then, logically, it can't...
+    gtk_label_set_text (GTK_LABEL (msg_label), _("Running tests..."));
     gtk_window_set_transient_for (GTK_WINDOW (msg_wd), GTK_WINDOW (piag_wd));
-    gtk_widget_show_all (GTK_WIDGET (msg_wd));
+    gtk_widget_show (GTK_WIDGET (msg_wd));
 
     // add a timer to update the dialog
     gdk_threads_add_timeout (1000, dialog_update, NULL);
@@ -414,6 +415,7 @@ int main (int argc, char *argv[])
 {
     GtkBuilder *builder;
     GtkCellRenderer *crt, *crb, *crr;
+    GtkWidget *wid;
 
 #ifdef ENABLE_NLS
     setlocale (LC_ALL, "");
@@ -443,10 +445,12 @@ int main (int argc, char *argv[])
     btn_reset = (GtkWidget *) gtk_builder_get_object (builder, "btn_reset");
     btn_log = (GtkWidget *) gtk_builder_get_object (builder, "btn_log");
 
-    msg_wd = (GtkWidget *) gtk_builder_get_object (builder, "msg_wd");
-    msg_label = (GtkWidget *) gtk_builder_get_object (builder, "msg_label");
-    msg_prog = (GtkWidget *) gtk_builder_get_object (builder, "msg_prog");
-    msg_btn = (GtkWidget *) gtk_builder_get_object (builder, "msg_btn");
+    msg_wd = (GtkWidget *) gtk_builder_get_object (builder, "modal");
+    msg_label = (GtkWidget *) gtk_builder_get_object (builder, "modal_msg");
+    msg_prog = (GtkWidget *) gtk_builder_get_object (builder, "modal_pb");
+    msg_btn = (GtkWidget *) gtk_builder_get_object (builder, "modal_cancel");
+    wid = (GtkWidget *) gtk_builder_get_object (builder, "modal_ok");
+    gtk_widget_hide (wid);
     g_object_unref (builder);
 
     // set up tree view
