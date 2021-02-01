@@ -1,0 +1,106 @@
+# Armenian translations for agnostics package.
+# Copyright (C) 2020 Raspberry Pi Ltd
+# This file is distributed under the same license as the agnostics package.
+# Simon Long <simon@raspberrypi.org>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: agnostics 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-05-05 14:16+0100\n"
+"PO-Revision-Date: 2019-02-18 15:13+0000\n"
+"Last-Translator: Armath <info@armath.am>\n"
+"Language-Team: Armenian\n"
+"Language: hy\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. create marked-up display text and add to list store
+#: ../src/agnostics.c:200
+#, c-format
+msgid ""
+"<b>%s</b>\n"
+"%s"
+msgstr ""
+"<b>%s</b>\n"
+"%s"
+
+#: ../src/agnostics.c:203
+msgid "Not Run"
+msgstr "Գործարկված չէ"
+
+#: ../src/agnostics.c:266
+msgid "Aborted"
+msgstr "Ընդհավտած է"
+
+#: ../src/agnostics.c:271
+msgid "<span foreground=\"#FF0000\"><b>FAIL</b></span>"
+msgstr "<span foreground=\"#FF0000\"><b>Ձախողված</b></span>"
+
+#: ../src/agnostics.c:276
+msgid "<span foreground=\"#00FF00\"><b>PASS</b></span>"
+msgstr "<span foreground=\"#00FF00\"><b>Հաջողված</b></span>"
+
+#: ../src/agnostics.c:305
+#, c-format
+msgid "Cancelling..."
+msgstr "Չեղարկում..."
+
+#: ../src/agnostics.c:307
+#, c-format
+msgid "Running %s..."
+msgstr "%s -ի գործարկում..."
+
+#: ../src/agnostics.c:307
+msgid "tests"
+msgstr "թեստավորում"
+
+#: ../src/agnostics.c:350
+msgid "Not run"
+msgstr "Չի գործարկվում"
+
+#: ../src/agnostics.c:458
+msgid "Test"
+msgstr "Թեստ"
+
+#: ../src/agnostics.c:463
+msgid "Run Test?"
+msgstr "Գործարկե՞լ թեստը"
+
+#: ../src/agnostics.c:470
+msgid "Result"
+msgstr "Արդյունք"
+
+#: ../data/agnostics.ui.h:1
+msgid "Running tests..."
+msgstr "Թեստի գործարկում..."
+
+#: ../data/agnostics.ui.h:2
+msgid "Cancel"
+msgstr "Չեղարկել"
+
+#: ../data/agnostics.ui.h:3 ../data/agnostics.desktop.in.h:1
+msgid "Raspberry Pi Diagnostics"
+msgstr "Raspberry Pi ախտորոշում"
+
+#: ../data/agnostics.ui.h:4
+msgid "_Close"
+msgstr "Փակել"
+
+#: ../data/agnostics.ui.h:5
+msgid "Show _Log"
+msgstr "Ցուցադրել տեղեկամատյաննը"
+
+#: ../data/agnostics.ui.h:6
+msgid "Re_set"
+msgstr "Զրոյացնել կարգավորումները"
+
+#: ../data/agnostics.ui.h:7
+msgid "_Run Tests"
+msgstr "Գործարկել թեստը"
+
+#: ../data/agnostics.desktop.in.h:2
+msgid "Test the Raspberry Pi hardware"
+msgstr "Ստուգել Raspberry Pi ապարատը"
