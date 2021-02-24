@@ -1,3 +1,9 @@
+agnostics (0.7) buster; urgency=medium
+
+  * Added Armenian translation
+
+ -- Simon Long <simon@raspberrypi.com>  Wed, 24 Feb 2021 15:36:05 +0000
+
 agnostics (0.6) buster; urgency=medium
 
   * Added Slovak translation
