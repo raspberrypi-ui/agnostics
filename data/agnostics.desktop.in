@@ -5,6 +5,5 @@ _GenericName=Raspberry Pi Diagnostics
 _Comment=Test the Raspberry Pi hardware
 Icon=rpi
 Exec=agnostics
-NotShowIn=GNOME;XFCE;
 StartupNotify=true
 Categories=Utility;
