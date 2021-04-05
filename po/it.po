@@ -1,0 +1,126 @@
+# Italian translations for agnostics package.
+# Copyright (C) 2020 Raspberry Pi Ltd
+# This file is distributed under the same license as the agnostics package.
+# Emanuele Goldoni <emanuele.goldoni@gmail.com>, 2021.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-02-24 16:51+0100\n"
+"PO-Revision-Date: 2021-04-05 18:30+0200\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.4.1\n"
+"Last-Translator: Emanuele Goldoni <emanuele.goldoni@gmail.com>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: it\n"
+
+#. create marked-up display text and add to list store
+#: ../src/agnostics.c:200
+#, c-format
+msgid ""
+"<b>%s</b>\n"
+"%s"
+msgstr ""
+"<b>%s</b>\n"
+"%s"
+
+#: ../src/agnostics.c:203
+msgid "Not Run"
+msgstr "Non eseguito"
+
+#: ../src/agnostics.c:266
+msgid "Aborted"
+msgstr "Interrotto"
+
+#: ../src/agnostics.c:271
+msgid "<span foreground=\"#FF0000\"><b>FAIL</b></span>"
+msgstr "<span foreground=\"#FF0000\"><b>FALLITO</b></span>"
+
+#: ../src/agnostics.c:276
+msgid "<span foreground=\"#00FF00\"><b>PASS</b></span>"
+msgstr "<span foreground=\"#00FF00\"><b>PASSATO</b></span>"
+
+#: ../src/agnostics.c:305
+#, c-format
+msgid "Cancelling..."
+msgstr "Annullamento..."
+
+#: ../src/agnostics.c:307
+#, c-format
+msgid "Running %s..."
+msgstr "Esecuzione di %s..."
+
+#: ../src/agnostics.c:307
+msgid "tests"
+msgstr "test"
+
+#. setting transient in the UI file doesn't work - but then, logically, it can't...
+#: ../src/agnostics.c:326
+msgid "Running tests..."
+msgstr "Esecuzione dei test..."
+
+#: ../src/agnostics.c:351
+msgid "Not run"
+msgstr "Non eseguito"
+
+#: ../src/agnostics.c:461
+msgid "Test"
+msgstr "Test"
+
+#: ../src/agnostics.c:466
+msgid "Run Test?"
+msgstr "Eseguire test?"
+
+#: ../src/agnostics.c:473
+msgid "Result"
+msgstr "Risultato"
+
+#: ../data/sdtest.sh:2
+msgid "SD Card Speed Test"
+msgstr "Test velocità scheda SD"
+
+#: ../data/sdtest.sh:3
+msgid ""
+"Determines whether an SD card can read and write data fast enough to provide adequate performance.\n"
+"\n"
+"Should be run on a new or newly-formatted SD card."
+msgstr ""
+"Determina se una scheda SD può leggere e scrivere dati abbastanza velocemente da fornire prestazioni adeguate.\n"
+"\n"
+"Dovrebbe essere eseguito su una scheda SD nuova o appena formattata."
+
+#: ../data/agnostics.ui.h:2
+msgid "_Cancel"
+msgstr "_Annulla"
+
+#: ../data/agnostics.ui.h:3
+msgid "_OK"
+msgstr "_OK"
+
+#: ../data/agnostics.ui.h:4 ../data/agnostics.desktop.in.h:1
+msgid "Raspberry Pi Diagnostics"
+msgstr "Diagnostica Raspberry Pi"
+
+#: ../data/agnostics.ui.h:5
+msgid "_Close"
+msgstr "_Chiudi"
+
+#: ../data/agnostics.ui.h:6
+msgid "Show _Log"
+msgstr "Mostra _registro"
+
+#: ../data/agnostics.ui.h:7
+msgid "Re_set"
+msgstr "Re_setta"
+
+#: ../data/agnostics.ui.h:8
+msgid "_Run Tests"
+msgstr "_Esegui i test"
+
+#: ../data/agnostics.desktop.in.h:2
+msgid "Test the Raspberry Pi hardware"
+msgstr "Test dell'hardware di Raspberry Pi"
