@@ -1,3 +1,9 @@
+agnostics (0.9) buster; urgency=medium
+
+  * Added Italian translation
+
+ -- Simon Long <simon@raspberrypi.com>  Thu, 15 Apr 2021 16:01:46 +0100
+
 agnostics (0.8) buster; urgency=medium
 
   * Remove hiding of app in other desktops
