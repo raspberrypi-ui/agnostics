@@ -1,3 +1,9 @@
+agnostics (0.10) bullseye; urgency=medium
+
+  * Fix size of modal dialog
+
+ -- Simon Long <simon@raspberrypi.com>  Tue, 15 Mar 2022 10:09:31 +0000
+
 agnostics (0.9) buster; urgency=medium
 
   * Added Italian translation
