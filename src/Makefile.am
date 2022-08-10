@@ -8,7 +8,8 @@ agnostics_CFLAGS = \
 	-DPACKAGE_BIN_DIR=\""$(bindir)"\" \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
 	$(PACKAGE_CFLAGS) \
-	$(G_CAST_CHECKS)
+	$(G_CAST_CHECKS) \
+	-Wall
 
 agnostics_SOURCES = agnostics.c
 

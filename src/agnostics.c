@@ -68,7 +68,7 @@ gchar *logfile;
 
 static void log_init (void);
 static void log_message (const char *format, ...);
-static int find_tests (void);
+static void find_tests (void);
 static void parse_test_file (gchar *path);
 static gpointer test_thread (gpointer data);
 static int dialog_update (gpointer data);
@@ -91,7 +91,7 @@ static void log_init (void)
 
     // get version number of agnostics package
     sprintf (buffer, "(unknown)");
-    if (fp = popen ("apt-cache policy agnostics | grep Installed | cut -d : -f 2", "r"))
+    if ((fp = popen ("apt-cache policy agnostics | grep Installed | cut -d : -f 2", "r")))
     {
         if (!fgets (buffer, sizeof (buffer) - 1, fp)) sprintf (buffer, "(unknown)");
         pclose (fp);
@@ -102,7 +102,7 @@ static void log_init (void)
     tstr = localtime (&now);
 
     // write header, overwriting existing file
-    if (fp = fopen (logfile, "w"))
+    if ((fp = fopen (logfile, "w")))
     {
         fprintf (fp, "Raspberry Pi Diagnostics - version %s\n%s\n", g_strstrip (buffer), asctime (tstr));
         fclose (fp);
@@ -121,7 +121,7 @@ static void log_message (const char *format, ...)
     vsprintf (buffer, format, args);
     va_end (args);
 
-    if (fp = fopen (logfile, "a"))
+    if ((fp = fopen (logfile, "a")))
     {
         fprintf (fp, "%s\n", buffer);
         fclose (fp);
@@ -130,7 +130,7 @@ static void log_message (const char *format, ...)
 
 /* Find all test files in the data directory and add them to the tests list store */
 
-static int find_tests (void)
+static void find_tests (void)
 {
     GDir *data_dir;
     const gchar *name;
