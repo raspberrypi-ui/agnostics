@@ -1,0 +1,126 @@
+# Lithuanian translations for agnostics package.
+# Copyright (C) 2020 Raspberry Pi Ltd
+# This file is distributed under the same license as the agnostics package.
+# Paulius Narkevičius <paulius.narkevicius@vilniustech.lt>, 2022.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-10-02 14:51+0100\n"
+"PO-Revision-Date: 2022-10-01 15:28+0300\n"
+"Last-Translator: NP <narkeviciusp@gmail.com>\n"
+"Language-Team: \n"
+"Language: lt\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.1.1\n"
+
+#. create marked-up display text and add to list store
+#: ../src/agnostics.c:200
+#, c-format
+msgid ""
+"<b>%s</b>\n"
+"%s"
+msgstr ""
+"<b>%s</b>\n"
+"%s"
+
+#: ../src/agnostics.c:203
+msgid "Not Run"
+msgstr "Nevykdyti"
+
+#: ../src/agnostics.c:266
+msgid "Aborted"
+msgstr "Nutraukta"
+
+#: ../src/agnostics.c:271
+msgid "<span foreground=\"#FF0000\"><b>FAIL</b></span>"
+msgstr "<span foreground=\"#FF0000\"><b>NEPAVYKO</b></span>"
+
+#: ../src/agnostics.c:276
+msgid "<span foreground=\"#00FF00\"><b>PASS</b></span>"
+msgstr "<span foreground=\"#00FF00\"><b>PAVYKO</b></span>"
+
+#: ../src/agnostics.c:305
+#, c-format
+msgid "Cancelling..."
+msgstr "Atšaukiama..."
+
+#: ../src/agnostics.c:307
+#, c-format
+msgid "Running %s..."
+msgstr "Vykdoma %s..."
+
+#: ../src/agnostics.c:307
+msgid "tests"
+msgstr "testai"
+
+#. setting transient in the UI file doesn't work - but then, logically, it can't...
+#: ../src/agnostics.c:326
+msgid "Running tests..."
+msgstr "Vykdomi testai..."
+
+#: ../src/agnostics.c:351
+msgid "Not run"
+msgstr "Nevykdyti"
+
+#: ../src/agnostics.c:461
+msgid "Test"
+msgstr "Test"
+
+#: ../src/agnostics.c:466
+msgid "Run Test?"
+msgstr "Vykdyti testą?"
+
+#: ../src/agnostics.c:473
+msgid "Result"
+msgstr "Rezultatas"
+
+#: ../data/sdtest.sh:2
+msgid "SD Card Speed Test"
+msgstr "SD kortelės našumo testas"
+
+#: ../data/sdtest.sh:3
+msgid ""
+"Determines whether an SD card can read and write data fast enough to provide adequate performance.\n"
+"\n"
+"Should be run on a new or newly-formatted SD card."
+msgstr ""
+"Nustatoma ar SD kortelė sugeba nuskaityti ir įrašyti duomenis išlaikant pakankamą greitį siekiu užtikrinti patenkinamus veiklos rezultatus.\n"
+"\n"
+"Turėtumei vykdyti panaudojant naują arba naujai išformatuotą SD kortelę."
+
+#: ../data/agnostics.ui.h:2
+msgid "_Cancel"
+msgstr "_Atšaukti"
+
+#: ../data/agnostics.ui.h:3
+msgid "_OK"
+msgstr "_Gerai"
+
+#: ../data/agnostics.ui.h:4 ../data/agnostics.desktop.in.h:1
+msgid "Raspberry Pi Diagnostics"
+msgstr "Raspberry Pi diagnostika"
+
+#: ../data/agnostics.ui.h:5
+msgid "_Close"
+msgstr "_Uždaryti"
+
+#: ../data/agnostics.ui.h:6
+msgid "Show _Log"
+msgstr "Peržiūrėti _užregistruotus duomenis"
+
+#: ../data/agnostics.ui.h:7
+msgid "Re_set"
+msgstr "Re_setas"
+
+#: ../data/agnostics.ui.h:8
+msgid "_Run Tests"
+msgstr "_Vykdyti testus"
+
+#: ../data/agnostics.desktop.in.h:2
+msgid "Test the Raspberry Pi hardware"
+msgstr "Testuoti Raspberry Pi aparatinę įrangą"
