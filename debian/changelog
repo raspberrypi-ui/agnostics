@@ -1,3 +1,9 @@
+agnostics (0.11) bullseye; urgency=medium
+
+  * Add Polish and Lithuanian translations
+
+ -- Simon Long <simon@raspberrypi.com>  Thu, 20 Oct 2022 13:24:54 +0100
+
 agnostics (0.10) bullseye; urgency=medium
 
   * Fix size of modal dialog
