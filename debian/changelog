@@ -1,3 +1,9 @@
+agnostics (0.12) bullseye; urgency=medium
+
+  * Add Korean translation
+
+ -- Simon Long <simon@raspberrypi.com>  Tue, 22 Nov 2022 10:26:07 +0000
+
 agnostics (0.11) bullseye; urgency=medium
 
   * Add Polish and Lithuanian translations
