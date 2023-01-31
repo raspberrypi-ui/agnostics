@@ -1,3 +1,9 @@
+agnostics (0.13) bullseye; urgency=medium
+
+  * Set undecorated dialogs in code
+
+ -- Simon Long <simon@raspberrypi.com>  Tue, 31 Jan 2023 09:50:51 +0000
+
 agnostics (0.12) bullseye; urgency=medium
 
   * Add Korean translation

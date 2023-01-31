@@ -325,7 +325,8 @@ static void run_test (GtkWidget *wid, gpointer data)
     // setting transient in the UI file doesn't work - but then, logically, it can't...
     gtk_label_set_text (GTK_LABEL (msg_label), _("Running tests..."));
     gtk_window_set_transient_for (GTK_WINDOW (msg_wd), GTK_WINDOW (piag_wd));
-    gtk_widget_show (GTK_WIDGET (msg_wd));
+    gtk_widget_show (msg_wd);
+    gtk_window_set_decorated (GTK_WINDOW (msg_wd), FALSE);
 
     // add a timer to update the dialog
     gdk_threads_add_timeout (1000, dialog_update, NULL);
