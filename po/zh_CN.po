@@ -100,7 +100,7 @@ msgstr "重新_设置"
 
 #: ../data/agnostics.ui.h:7
 msgid "_Run Tests"
-msgstr "_运行测试"
+msgstr "_运行 测试"
 
 #: ../data/agnostics.desktop.in.h:2
 msgid "Test the Raspberry Pi hardware"
