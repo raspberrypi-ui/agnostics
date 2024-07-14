@@ -4,8 +4,8 @@
 #
 [global]
 ioengine=libaio
-iodepth=4
-size=64m
+iodepth=32
+size=256m
 direct=1
 end_fsync=1
 directory=/var/tmp
@@ -18,7 +18,12 @@ stonewall
 
 [seq-write]
 rw=write
-bs=512k
+bs=4m
+stonewall
+
+[seq-read]
+rw=read
+bs=4m
 stonewall
 
 [rand-4k-write]
