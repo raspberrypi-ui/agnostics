@@ -1,3 +1,9 @@
+agnostics (0.16) bookworm; urgency=medium
+
+  * Fix for random test failures
+
+ -- Simon Long <simon@raspberrypi.com>  Fri, 19 Jul 2024 11:37:34 +0100
+
 agnostics (0.15) bookworm; urgency=medium
 
   * Add testing for A2 cards; add Chinese translation

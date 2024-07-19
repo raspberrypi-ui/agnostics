@@ -7,8 +7,9 @@ do
     RES=$(fio --output-format=terse --max-jobs=4 /usr/share/agnostics/sd_bench.fio | cut -f 3,7,8,48,49 -d";" -)
     echo "$RES"
     swri=$(echo "$RES" | head -n 2 | tail -n 1 | cut -d ";" -f 4)
-    rwri=$(echo "$RES" | head -n 3 | tail -n 1 | cut -d ";" -f 5)
-    rrea=$(echo "$RES" | head -n 4 | tail -n 1 | cut -d ";" -f 3)
+    srea=$(echo "$RES" | head -n 3 | tail -n 1 | cut -d ";" -f 4)
+    rwri=$(echo "$RES" | head -n 4 | tail -n 1 | cut -d ";" -f 5)
+    rrea=$(echo "$RES" | head -n 5 | tail -n 1 | cut -d ";" -f 3)
     pass=0
     if [ "$swri" -lt 10000 ] ; then
         echo "Sequential write speed $swri KB/sec (target 10000) - FAIL"
