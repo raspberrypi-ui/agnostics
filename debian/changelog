@@ -1,3 +1,9 @@
+agnostics (0.17) bookworm; urgency=medium
+
+  * Fix shadows on undecorated windows
+
+ -- Simon Long <simon@raspberrypi.com>  Thu, 12 Sep 2024 13:44:23 +0100
+
 agnostics (0.16) bookworm; urgency=medium
 
   * Fix for random test failures
