@@ -40,12 +40,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* Columns in tree store */
 
 #define PIAG_FILE           0
+#define PIAG_LOGFILE        0
 #define PIAG_NAME           1
 #define PIAG_TEXT           2
 #define PIAG_RESULT         3
+#define PIAG_SERVICE        3
 #define PIAG_ENABLED        4
-#define PIAG_SERVICE        5
-#define PIAG_LOGFILE        6
 
 /* Controls */
 
@@ -178,7 +178,7 @@ static void find_tests (void)
 static void parse_test_file (gchar *path)
 {
     FILE *fp;
-    char *line, *name, *desc, *mutext, *cdesc, *serv, *logf;
+    char *line, *name, *desc, *mutext, *cdesc, *serv, *logf, *cmd;
     size_t len;
     GtkTreeIter entry;
     gboolean boot = FALSE;
@@ -223,9 +223,12 @@ static void parse_test_file (gchar *path)
             if (boot)
             {
                 gtk_list_store_append (btests, &entry);
-                gtk_list_store_set (btests, &entry, PIAG_FILE, path, PIAG_NAME, name,
-                    PIAG_TEXT, mutext, PIAG_RESULT, _("Not Run"), PIAG_ENABLED, FALSE,
-                    PIAG_SERVICE, serv, PIAG_LOGFILE, logf, -1);
+                gtk_list_store_set (btests, &entry, PIAG_LOGFILE, logf, PIAG_NAME, name,
+                    PIAG_TEXT, mutext, PIAG_SERVICE, serv, PIAG_ENABLED, FALSE, -1);
+
+                cmd = g_strdup_printf ("sudo systemctl disable %s", serv);
+                system (cmd);
+                g_free (cmd);
             }
             else
             {
@@ -447,12 +450,10 @@ static void runrb_toggled (GtkCellRendererToggle *cell, gchar *path, gpointer da
     gtk_list_store_set (GTK_LIST_STORE (btests), &iter, PIAG_ENABLED, 1 - val, -1);
 
     cmd = g_strdup_printf ("sudo systemctl %s %s", 1 - val ? "enable" : "disable", serv);
-    printf ("%s\n", cmd);
     system (cmd);
-    g_free (serv);
     g_free (cmd);
+    g_free (serv);
 }
-
 
 /* Handler for 'cancel' button on progress dialog */
 
@@ -481,6 +482,8 @@ static void set_controls (int end)
     gtk_widget_set_visible (btn_run, end == 0);
     if (end) gtk_widget_grab_focus (btn_reset);
     else gtk_widget_grab_focus (btn_run);
+    gtk_widget_set_sensitive (btn_bootlog, g_file_test ("/run/rpi-analyse-boot.service/index.html", G_FILE_TEST_IS_REGULAR)
+        || g_file_test ("/run/rpi-analyse-boot.service/trace", G_FILE_TEST_IS_REGULAR));
 }
 
 /* The dialog... */
@@ -504,7 +507,7 @@ int main (int argc, char *argv[])
 
     // find test files in data directory
     tests = gtk_list_store_new (5, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_BOOLEAN);
-    btests = gtk_list_store_new (7, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_BOOLEAN, G_TYPE_STRING, G_TYPE_STRING);
+    btests = gtk_list_store_new (5, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_BOOLEAN);
     find_tests ();
 
     // get path to log file in user's home directory
