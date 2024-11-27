@@ -40,7 +40,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* Columns in tree store */
 
 #define PIAG_FILE           0
-#define PIAG_LOGFILE        0
 #define PIAG_NAME           1
 #define PIAG_TEXT           2
 #define PIAG_RESULT         3
@@ -178,7 +177,7 @@ static void find_tests (void)
 static void parse_test_file (gchar *path)
 {
     FILE *fp;
-    char *line, *name, *desc, *mutext, *cdesc, *serv, *logf, *cmd;
+    char *line, *name, *desc, *mutext, *cdesc, *serv, *cmd;
     size_t len;
     GtkTreeIter entry;
     gboolean boot = FALSE;
@@ -190,7 +189,6 @@ static void parse_test_file (gchar *path)
         name = NULL;
         desc = NULL;
         serv = NULL;
-        logf = NULL;
         line = NULL;
         len = 0;
         while (getline (&line, &len, fp) != -1)
@@ -199,7 +197,6 @@ static void parse_test_file (gchar *path)
             if (!strncmp (line, "#DESC=", 6)) desc = g_strdup (line + 6);
             if (!strncmp (line, "#BOOT", 5)) boot = TRUE;
             if (!strncmp (line, "#SERVICE=", 9)) serv = g_strdup (line + 9);
-            if (!strncmp (line, "#LOGFILE=", 9)) logf = g_strdup (line + 9);
         }
         free (line);
         fclose (fp);
@@ -210,11 +207,7 @@ static void parse_test_file (gchar *path)
             g_strstrip (name);
             g_strstrip (desc);
             cdesc = g_strcompress (desc);
-            if (boot)
-            {
-                g_strstrip (serv);
-                g_strstrip (logf);
-            }
+            if (boot) g_strstrip (serv);
 
             // create marked-up display text and add to list store
             mutext = g_strdup_printf (_("<b>%s</b>\n%s"), name, cdesc);
@@ -226,8 +219,8 @@ static void parse_test_file (gchar *path)
                 res = system (cmd);
                 g_free (cmd);
 
-                gtk_list_store_set (btests, &entry, PIAG_LOGFILE, logf, PIAG_NAME, name,
-                    PIAG_TEXT, mutext, PIAG_SERVICE, serv, PIAG_ENABLED, res == 0 ? TRUE : FALSE, -1);
+                gtk_list_store_set (btests, &entry, PIAG_NAME, name, PIAG_TEXT, mutext,
+                    PIAG_SERVICE, serv, PIAG_ENABLED, res == 0 ? TRUE : FALSE, -1);
             }
             else
             {
@@ -243,7 +236,6 @@ static void parse_test_file (gchar *path)
         if (name) g_free (name);
         if (desc) g_free (desc);
         if (serv) g_free (serv);
-        if (logf) g_free (logf);
     }
 }
 
@@ -555,7 +547,7 @@ int main (int argc, char *argv[])
 
     crrb = gtk_cell_renderer_toggle_new ();
     g_object_set (G_OBJECT (crrb), "activatable", TRUE, NULL);
-    gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (boot_tv), 1, _("Run Test?"), crrb, "active", PIAG_ENABLED, NULL);
+    gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (boot_tv), 1, _("Enabled"), crrb, "active", PIAG_ENABLED, NULL);
     gtk_tree_view_column_set_sizing (gtk_tree_view_get_column (GTK_TREE_VIEW (boot_tv), 1), GTK_TREE_VIEW_COLUMN_FIXED);
     gtk_tree_view_column_set_fixed_width (gtk_tree_view_get_column (GTK_TREE_VIEW (boot_tv), 1), 100);
     gtk_tree_view_column_set_alignment (gtk_tree_view_get_column (GTK_TREE_VIEW (boot_tv), 1), 0.5);
