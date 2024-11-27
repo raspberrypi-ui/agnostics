@@ -48,7 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /* Controls */
 
-GtkWidget *piag_wd, *piag_tv, *btn_run, *btn_close, *btn_reset, *btn_log, *btn_reboot, *btn_bootlog, *msg_wd, *msg_label, *msg_prog, *msg_btn, *boot_tv;
+GtkWidget *piag_wd, *piag_nb, *piag_tv, *btn_run, *btn_close, *btn_reset, *btn_log, *btn_reboot, *btn_bootlog, *msg_wd, *msg_label, *msg_prog, *msg_btn, *boot_tv;
 
 /* List of tests */
 
@@ -466,6 +466,8 @@ static void end_program (GtkWidget *wid, gpointer data)
 
 static void set_controls (int end)
 {
+    GtkTreeIter iter;
+
     gtk_tree_view_column_set_visible (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 1), end == 0);
     gtk_tree_view_column_set_visible (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 2), end == 1);
     gtk_widget_set_visible (btn_reset, end == 1);
@@ -473,8 +475,12 @@ static void set_controls (int end)
     gtk_widget_set_visible (btn_run, end == 0);
     if (end) gtk_widget_grab_focus (btn_reset);
     else gtk_widget_grab_focus (btn_run);
+
     gtk_widget_set_sensitive (btn_bootlog, g_file_test ("/run/rpi-analyse-boot.service/index.html", G_FILE_TEST_IS_REGULAR)
         || g_file_test ("/run/rpi-analyse-boot.service/trace", G_FILE_TEST_IS_REGULAR));
+
+    if (!gtk_tree_model_get_iter_first (GTK_TREE_MODEL (btests), &iter))
+        gtk_widget_hide (gtk_notebook_get_nth_page (GTK_NOTEBOOK (piag_nb), 1));
 }
 
 /* The dialog... */
@@ -508,6 +514,7 @@ int main (int argc, char *argv[])
     builder = gtk_builder_new_from_file (PACKAGE_UI_DIR "/agnostics.ui");
 
     piag_wd = (GtkWidget *) gtk_builder_get_object (builder, "piag_wd");
+    piag_nb = (GtkWidget *) gtk_builder_get_object (builder, "piag_nb");
     piag_tv = (GtkWidget *) gtk_builder_get_object (builder, "piag_tv");
     btn_run = (GtkWidget *) gtk_builder_get_object (builder, "btn_run");
     btn_close = (GtkWidget *) gtk_builder_get_object (builder, "btn_close");

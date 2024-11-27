@@ -113,7 +113,7 @@
         <property name="can-focus">False</property>
         <property name="orientation">vertical</property>
         <child>
-          <object class="GtkNotebook">
+          <object class="GtkNotebook" id="piag_nb">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <child>
