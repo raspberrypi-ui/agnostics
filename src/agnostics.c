@@ -182,6 +182,7 @@ static void parse_test_file (gchar *path)
     size_t len;
     GtkTreeIter entry;
     gboolean boot = FALSE;
+    int res;
 
     fp = fopen (path, "rb");
     if (fp)
@@ -196,11 +197,8 @@ static void parse_test_file (gchar *path)
         {
             if (!strncmp (line, "#NAME=", 6)) name = g_strdup (line + 6);
             if (!strncmp (line, "#DESC=", 6)) desc = g_strdup (line + 6);
-            if (!strncmp (line, "#SERVICE=", 9))
-            {
-                serv = g_strdup (line + 9);
-                boot = TRUE;
-            }
+            if (!strncmp (line, "#BOOT", 5)) boot = TRUE;
+            if (!strncmp (line, "#SERVICE=", 9)) serv = g_strdup (line + 9);
             if (!strncmp (line, "#LOGFILE=", 9)) logf = g_strdup (line + 9);
         }
         free (line);
@@ -223,12 +221,13 @@ static void parse_test_file (gchar *path)
             if (boot)
             {
                 gtk_list_store_append (btests, &entry);
-                gtk_list_store_set (btests, &entry, PIAG_LOGFILE, logf, PIAG_NAME, name,
-                    PIAG_TEXT, mutext, PIAG_SERVICE, serv, PIAG_ENABLED, FALSE, -1);
 
-                cmd = g_strdup_printf ("sudo systemctl disable %s", serv);
-                system (cmd);
+                cmd = g_strdup_printf ("sudo systemctl -q is-enabled %s", serv);
+                res = system (cmd);
                 g_free (cmd);
+
+                gtk_list_store_set (btests, &entry, PIAG_LOGFILE, logf, PIAG_NAME, name,
+                    PIAG_TEXT, mutext, PIAG_SERVICE, serv, PIAG_ENABLED, res == 0 ? TRUE : FALSE, -1);
             }
             else
             {

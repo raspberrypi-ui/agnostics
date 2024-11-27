@@ -1,5 +1,6 @@
 #!/bin/bash
 #NAME=Trace Boot 
 #DESC=Runs Perfetto during boot to collect detailed trace information.
+#BOOT
 #SERVICE=rpi-trace-boot.service
-#LOGFILE=http://www.google.com
+#LOGFILE=/run/rpi-trace-boot.service/trace
