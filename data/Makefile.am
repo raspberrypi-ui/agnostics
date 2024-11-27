@@ -15,7 +15,9 @@ desktop_DATA = $(desktop_in_files:.desktop.in=.desktop)
 testsdir = $(datadir)/agnostics
 
 tests_in_files = 	sdtest.sh \
-				sd_bench.fio
+				sd_bench.fio \
+				traceboot.sh \
+				analyseboot.sh
 
 tests_DATA = $(tests_in_files)
 

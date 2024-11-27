@@ -44,15 +44,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PIAG_TEXT           2
 #define PIAG_RESULT         3
 #define PIAG_ENABLED        4
+#define PIAG_SERVICE        5
+#define PIAG_LOGFILE        6
 
 /* Controls */
 
-GtkWidget *piag_wd, *piag_tv, *btn_run, *btn_close, *btn_reset, *btn_log, *msg_wd, *msg_label, *msg_prog, *msg_btn;
+GtkWidget *piag_wd, *piag_tv, *btn_run, *btn_close, *btn_reset, *btn_log, *btn_reboot, *btn_bootlog, *msg_wd, *msg_label, *msg_prog, *msg_btn, *boot_tv;
 
 /* List of tests */
 
-GtkListStore *tests;
-GtkTreeModel *stests;
+GtkListStore *tests, *btests;
+GtkTreeModel *stests, *sbtests;
 
 /* Inter-thread globals */
 
@@ -75,7 +77,10 @@ static int dialog_update (gpointer data);
 static void run_test (GtkWidget *wid, gpointer data);
 static void reset_test (GtkWidget *wid, gpointer data);
 static void show_log (GtkWidget *wid, gpointer data);
+static void show_bootlog (GtkWidget *wid, gpointer data);
+static void reboot (GtkWidget *wid, gpointer data);
 static void run_toggled (GtkCellRendererToggle *cell, gchar *path, gpointer data);
+static void runrb_toggled (GtkCellRendererToggle *cell, gchar *path, gpointer data);
 static void cancel_test (GtkWidget *wid, gpointer data);
 static void end_program (GtkWidget *wid, gpointer data);
 static void set_controls (int end);
@@ -154,6 +159,9 @@ static void find_tests (void)
         // alphasort the raw tree into a sorted tree structure
         stests = gtk_tree_model_sort_new_with_model (GTK_TREE_MODEL (tests));
         gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (stests), PIAG_NAME, GTK_SORT_ASCENDING);
+
+        sbtests = gtk_tree_model_sort_new_with_model (GTK_TREE_MODEL (btests));
+        gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (sbtests), PIAG_NAME, GTK_SORT_ASCENDING);
     }
 }
 
@@ -170,21 +178,30 @@ static void find_tests (void)
 static void parse_test_file (gchar *path)
 {
     FILE *fp;
-    char *line, *name, *desc, *mutext, *cdesc;
+    char *line, *name, *desc, *mutext, *cdesc, *serv, *logf;
     size_t len;
     GtkTreeIter entry;
+    gboolean boot = FALSE;
 
     fp = fopen (path, "rb");
     if (fp)
     {
         name = NULL;
         desc = NULL;
+        serv = NULL;
+        logf = NULL;
         line = NULL;
         len = 0;
         while (getline (&line, &len, fp) != -1)
         {
             if (!strncmp (line, "#NAME=", 6)) name = g_strdup (line + 6);
             if (!strncmp (line, "#DESC=", 6)) desc = g_strdup (line + 6);
+            if (!strncmp (line, "#SERVICE=", 9))
+            {
+                serv = g_strdup (line + 9);
+                boot = TRUE;
+            }
+            if (!strncmp (line, "#LOGFILE=", 9)) logf = g_strdup (line + 9);
         }
         free (line);
         fclose (fp);
@@ -192,21 +209,39 @@ static void parse_test_file (gchar *path)
         if (name && desc)
         {
             // trim the newlines
-            *(name + strlen (name) - 1) = 0;
-            *(desc + strlen (desc) - 1) = 0;
+            g_strstrip (name);
+            g_strstrip (desc);
             cdesc = g_strcompress (desc);
+            if (boot)
+            {
+                g_strstrip (serv);
+                g_strstrip (logf);
+            }
 
             // create marked-up display text and add to list store
             mutext = g_strdup_printf (_("<b>%s</b>\n%s"), name, cdesc);
-            gtk_list_store_append (tests, &entry);
-            gtk_list_store_set (tests, &entry, PIAG_FILE, path, PIAG_NAME, name, 
-                PIAG_TEXT, mutext, PIAG_RESULT, _("Not Run"), PIAG_ENABLED, TRUE, -1);
+            if (boot)
+            {
+                gtk_list_store_append (btests, &entry);
+                gtk_list_store_set (btests, &entry, PIAG_FILE, path, PIAG_NAME, name,
+                    PIAG_TEXT, mutext, PIAG_RESULT, _("Not Run"), PIAG_ENABLED, FALSE,
+                    PIAG_SERVICE, serv, PIAG_LOGFILE, logf, -1);
+            }
+            else
+            {
+                gtk_list_store_append (tests, &entry);
+                gtk_list_store_set (tests, &entry, PIAG_FILE, path, PIAG_NAME, name,
+                    PIAG_TEXT, mutext, PIAG_RESULT, _("Not Run"), PIAG_ENABLED, TRUE, -1);
+            }
+
             g_free (mutext);
             g_free (cdesc);
         }
 
         if (name) g_free (name);
         if (desc) g_free (desc);
+        if (serv) g_free (serv);
+        if (logf) g_free (logf);
     }
 }
 
@@ -366,6 +401,25 @@ static void show_log (GtkWidget *wid, gpointer data)
     }
 }
 
+static void show_bootlog (GtkWidget *wid, gpointer data)
+{
+    if (fork () == 0)
+    {
+        if (g_file_test ("/run/rpi-analyse-boot.service/index.html", G_FILE_TEST_IS_REGULAR))
+            execl ("/usr/bin/xdg-open", "xdg-open", "/run/rpi-analyse-boot.service/index.html", NULL);
+        else
+            execl ("/usr/bin/xdg-open", "xdg-open", "/run/rpi-analyse-boot.service/index.html", NULL);
+        exit (0);
+    }
+}
+
+/* Handler for 'reboot' button */
+
+static void reboot (GtkWidget *wid, gpointer data)
+{
+    system ("reboot");
+}
+
 /* Handler for click on tree view check box */
 
 static void run_toggled (GtkCellRendererToggle *cell, gchar *path, gpointer data)
@@ -379,6 +433,26 @@ static void run_toggled (GtkCellRendererToggle *cell, gchar *path, gpointer data
     gtk_tree_model_get (GTK_TREE_MODEL (tests), &iter, PIAG_ENABLED, &val, -1);
     gtk_list_store_set (GTK_LIST_STORE (tests), &iter, PIAG_ENABLED, 1 - val, -1);
 }
+
+static void runrb_toggled (GtkCellRendererToggle *cell, gchar *path, gpointer data)
+{
+    GtkTreeIter iter, siter;
+    gboolean val;
+    char *serv, *cmd;
+
+    // find iterator in tests which corresponds to row clicked
+    gtk_tree_model_get_iter_from_string (sbtests, &siter, path);
+    gtk_tree_model_sort_convert_iter_to_child_iter (GTK_TREE_MODEL_SORT (sbtests), &iter, &siter);
+    gtk_tree_model_get (GTK_TREE_MODEL (btests), &iter, PIAG_ENABLED, &val, PIAG_SERVICE, &serv, -1);
+    gtk_list_store_set (GTK_LIST_STORE (btests), &iter, PIAG_ENABLED, 1 - val, -1);
+
+    cmd = g_strdup_printf ("sudo systemctl %s %s", 1 - val ? "enable" : "disable", serv);
+    printf ("%s\n", cmd);
+    system (cmd);
+    g_free (serv);
+    g_free (cmd);
+}
+
 
 /* Handler for 'cancel' button on progress dialog */
 
@@ -414,7 +488,7 @@ static void set_controls (int end)
 int main (int argc, char *argv[])
 {
     GtkBuilder *builder;
-    GtkCellRenderer *crt, *crb, *crr;
+    GtkCellRenderer *crt, *crb, *crr, *crrb;
     GtkWidget *wid;
 
 #ifdef ENABLE_NLS
@@ -430,6 +504,7 @@ int main (int argc, char *argv[])
 
     // find test files in data directory
     tests = gtk_list_store_new (5, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_BOOLEAN);
+    btests = gtk_list_store_new (7, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_BOOLEAN, G_TYPE_STRING, G_TYPE_STRING);
     find_tests ();
 
     // get path to log file in user's home directory
@@ -445,6 +520,10 @@ int main (int argc, char *argv[])
     btn_reset = (GtkWidget *) gtk_builder_get_object (builder, "btn_reset");
     btn_log = (GtkWidget *) gtk_builder_get_object (builder, "btn_log");
 
+    boot_tv = (GtkWidget *) gtk_builder_get_object (builder, "boot_tv");
+    btn_reboot = (GtkWidget *) gtk_builder_get_object (builder, "btn_reboot");
+    btn_bootlog = (GtkWidget *) gtk_builder_get_object (builder, "btn_bootlog");
+
     msg_wd = (GtkWidget *) gtk_builder_get_object (builder, "modal");
     msg_label = (GtkWidget *) gtk_builder_get_object (builder, "modal_msg");
     msg_prog = (GtkWidget *) gtk_builder_get_object (builder, "modal_pb");
@@ -455,11 +534,15 @@ int main (int argc, char *argv[])
 
     // set up tree view
     gtk_tree_view_set_model (GTK_TREE_VIEW (piag_tv), GTK_TREE_MODEL (stests));
+    gtk_tree_view_set_model (GTK_TREE_VIEW (boot_tv), GTK_TREE_MODEL (sbtests));
 
     crt = gtk_cell_renderer_text_new ();
     g_object_set (G_OBJECT (crt), "wrap-width", 380, "wrap-mode", PANGO_WRAP_WORD_CHAR, NULL);
     gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (piag_tv), 0, _("Test"), crt, "markup", PIAG_TEXT, NULL);
     gtk_tree_view_column_set_expand (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 0), TRUE);
+
+    gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (boot_tv), 0, _("Test"), crt, "markup", PIAG_TEXT, NULL);
+    gtk_tree_view_column_set_expand (gtk_tree_view_get_column (GTK_TREE_VIEW (boot_tv), 0), TRUE);
 
     crb = gtk_cell_renderer_toggle_new ();
     g_object_set (G_OBJECT (crb), "activatable", TRUE, NULL);
@@ -467,6 +550,13 @@ int main (int argc, char *argv[])
     gtk_tree_view_column_set_sizing (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 1), GTK_TREE_VIEW_COLUMN_FIXED);
     gtk_tree_view_column_set_fixed_width (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 1), 100);
     gtk_tree_view_column_set_alignment (gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 1), 0.5);
+
+    crrb = gtk_cell_renderer_toggle_new ();
+    g_object_set (G_OBJECT (crrb), "activatable", TRUE, NULL);
+    gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (boot_tv), 1, _("Run Test?"), crrb, "active", PIAG_ENABLED, NULL);
+    gtk_tree_view_column_set_sizing (gtk_tree_view_get_column (GTK_TREE_VIEW (boot_tv), 1), GTK_TREE_VIEW_COLUMN_FIXED);
+    gtk_tree_view_column_set_fixed_width (gtk_tree_view_get_column (GTK_TREE_VIEW (boot_tv), 1), 100);
+    gtk_tree_view_column_set_alignment (gtk_tree_view_get_column (GTK_TREE_VIEW (boot_tv), 1), 0.5);
 
     crr = gtk_cell_renderer_text_new ();
     g_object_set (G_OBJECT (crr), "xalign", 0.5, NULL);
@@ -477,12 +567,15 @@ int main (int argc, char *argv[])
 
     // connect handlers
     g_signal_connect (crb, "toggled", G_CALLBACK (run_toggled), NULL);
+    g_signal_connect (crrb, "toggled", G_CALLBACK (runrb_toggled), NULL);
     g_signal_connect (piag_wd, "delete-event", G_CALLBACK (end_program), NULL);
     g_signal_connect (btn_close, "clicked", G_CALLBACK (end_program), NULL);
     g_signal_connect (btn_run, "clicked", G_CALLBACK (run_test), NULL);
     g_signal_connect (btn_reset, "clicked", G_CALLBACK (reset_test), NULL);
     g_signal_connect (btn_log, "clicked", G_CALLBACK (show_log), NULL);
     g_signal_connect (msg_btn, "clicked", G_CALLBACK (cancel_test), NULL);
+    g_signal_connect (btn_reboot, "clicked", G_CALLBACK (reboot), NULL);
+    g_signal_connect (btn_bootlog, "clicked", G_CALLBACK (show_bootlog), NULL);
 
     set_controls (0);
 
