@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
+Copyright (c) 2020-2025 Raspberry Pi
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -25,13 +25,10 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/wait.h>
+#include <locale.h>
 
 #include <glib.h>
 #include <glib/gi18n.h>
@@ -417,12 +414,10 @@ int main (int argc, char *argv[])
     GtkCellRenderer *crt, *crb, *crr;
     GtkWidget *wid;
 
-#ifdef ENABLE_NLS
     setlocale (LC_ALL, "");
     bindtextdomain (GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
     bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
     textdomain (GETTEXT_PACKAGE);
-#endif
 
     // GTK setup
     gtk_init (&argc, &argv);
