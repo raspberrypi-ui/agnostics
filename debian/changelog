@@ -1,3 +1,9 @@
+agnostics (0.19) bookworm; urgency=medium
+
+  * Fix desktop file
+
+ -- Simon Long <simon@raspberrypi.com>  Wed, 19 Mar 2025 14:55:13 +0000
+
 agnostics (0.18) bookworm; urgency=medium
 
   * Use meson
