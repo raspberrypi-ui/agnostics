@@ -2,6 +2,7 @@ install_data('agnostics.ui', install_dir: ui_dir)
 install_data('sd_bench.fio', install_dir: resource_dir)
 install_data('sdtest.sh', install_dir: resource_dir)
 
+install_subdir('icons', install_dir: share_dir)
 i18n.merge_file(input: 'agnostics.desktop.in',
   output: 'agnostics.desktop',
   type: 'desktop',
@@ -9,3 +10,7 @@ i18n.merge_file(input: 'agnostics.desktop.in',
   install: true,
   install_dir: desktop_dir
 )
+
+gnome = import ('gnome')
+gnome.post_install (gtk_update_icon_cache : true)
+
