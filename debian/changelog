@@ -1,3 +1,9 @@
+agnostics (1.0) trixie; urgency=medium
+
+  * Trixie version
+
+ -- Simon Long <simon@raspberrypi.com>  Mon, 02 Jun 2025 09:12:07 +0100
+
 agnostics (0.20) bookworm; urgency=medium
 
   * Add icon
