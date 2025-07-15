@@ -1,3 +1,9 @@
+agnostics (1.1) trixie; urgency=medium
+
+  * Fix dependencies
+
+ -- Simon Long <simon@raspberrypi.com>  Tue, 15 Jul 2025 14:21:20 +0100
+
 agnostics (1.0) trixie; urgency=medium
 
   * Trixie version

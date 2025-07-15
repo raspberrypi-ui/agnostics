@@ -8,6 +8,6 @@ Homepage: http://raspberrypi.com/
 
 Package: agnostics
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libgtk-3-0 (>= 3.24), mousepad, fio
+Depends: ${shlibs:Depends}, ${misc:Depends}, mousepad, fio
 Description: Raspberry Pi Diagnostics
  Extensible diagnostics package to test Raspberry Pi hardware
