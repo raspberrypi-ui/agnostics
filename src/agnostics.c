@@ -413,6 +413,8 @@ int main (int argc, char *argv[])
     GtkBuilder *builder;
     GtkCellRenderer *crt, *crb, *crr;
     GtkWidget *wid;
+    GtkTreePath *path;
+    GtkTreeViewColumn *col;
 
     setlocale (LC_ALL, "");
     bindtextdomain (GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
@@ -483,6 +485,12 @@ int main (int argc, char *argv[])
 
     gtk_window_set_default_size (GTK_WINDOW (piag_wd), 500, 350);
     gtk_widget_show (piag_wd);
+
+    // set keyboard focus
+    path = gtk_tree_path_new_first ();
+    col = gtk_tree_view_get_column (GTK_TREE_VIEW (piag_tv), 1);
+    gtk_tree_view_set_cursor (GTK_TREE_VIEW (piag_tv), path, col, FALSE);
+    gtk_tree_path_free (path);
 
     // main loop
     gtk_main ();

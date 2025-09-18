@@ -1,3 +1,9 @@
+agnostics (1.2) trixie; urgency=medium
+
+  * Set keyboard focus to check box column
+
+ -- Simon Long <simon@raspberrypi.com>  Thu, 18 Sep 2025 11:28:21 +0100
+
 agnostics (1.1) trixie; urgency=medium
 
   * Fix dependencies
