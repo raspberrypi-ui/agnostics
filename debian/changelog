@@ -1,3 +1,9 @@
+agnostics (1.6) trixie; urgency=medium
+
+  * Add activation
+
+ -- Simon Long <simon@raspberrypi.com>  Wed, 01 Apr 2026 13:19:28 +0100
+
 agnostics (1.5) trixie; urgency=medium
 
   * Add larger icons
