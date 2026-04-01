@@ -34,6 +34,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
 
+#include "activate.h"
+
 /* Columns in tree store */
 
 #define PIAG_FILE           0
@@ -415,6 +417,8 @@ int main (int argc, char *argv[])
     GtkWidget *wid;
     GtkTreePath *path;
 
+    init_dbus ("agnostics");
+
     setlocale (LC_ALL, "");
     bindtextdomain (GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
     bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
@@ -485,6 +489,8 @@ int main (int argc, char *argv[])
     gtk_window_set_default_size (GTK_WINDOW (piag_wd), 500, 350);
     gtk_widget_show (piag_wd);
 
+    setup_activate (piag_wd);
+
     // set keyboard focus
     path = gtk_tree_path_new_first ();
     gtk_tree_view_set_cursor (GTK_TREE_VIEW (piag_tv), path, NULL, FALSE);
@@ -494,5 +500,7 @@ int main (int argc, char *argv[])
     gtk_main ();
 
     g_free (logfile);
+
+    close_dbus ();
     return 0;
 }
