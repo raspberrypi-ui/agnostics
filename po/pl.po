@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-10-02 14:51+0100\n"
-"PO-Revision-Date: 2022-10-01 16:09+0300\n"
-"Last-Translator: NP <narkeviciusp@gmail.com>\n"
+"PO-Revision-Date: 2026-04-30 08:47+0300\n"
+"Last-Translator: Skotniczny <skotniczny@outlook.com>\n"
 "Language-Team: \n"
 "Language: pl\n"
 "MIME-Version: 1.0\n"
@@ -30,7 +30,7 @@ msgstr ""
 
 #: ../src/agnostics.c:203
 msgid "Not Run"
-msgstr "Nie wykonaj"
+msgstr "Nie uruchomiono"
 
 #: ../src/agnostics.c:266
 msgid "Aborted"
@@ -38,21 +38,21 @@ msgstr "Przerwane"
 
 #: ../src/agnostics.c:271
 msgid "<span foreground=\"#FF0000\"><b>FAIL</b></span>"
-msgstr "<span foreground=\"#FF0000\"><b>Nie powiódło się</b></span>"
+msgstr "<span foreground=\"#FF0000\"><b>NIEZALICZONY</b></span>"
 
 #: ../src/agnostics.c:276
 msgid "<span foreground=\"#00FF00\"><b>PASS</b></span>"
-msgstr "<span foreground=\"#00FF00\"><b>Powiódło się</b></span>"
+msgstr "<span foreground=\"#00FF00\"><b>ZALICZONY</b></span>"
 
 #: ../src/agnostics.c:305
 #, c-format
 msgid "Cancelling..."
-msgstr "Anulujem..."
+msgstr "Anulowanie…"
 
 #: ../src/agnostics.c:307
 #, c-format
 msgid "Running %s..."
-msgstr "Wykonajem %s..."
+msgstr "Wykonywanie %s…"
 
 #: ../src/agnostics.c:307
 msgid "tests"
@@ -61,11 +61,11 @@ msgstr "test"
 #. setting transient in the UI file doesn't work - but then, logically, it can't...
 #: ../src/agnostics.c:326
 msgid "Running tests..."
-msgstr "Wykonajem test..."
+msgstr "Wykonywanie testu…"
 
 #: ../src/agnostics.c:351
 msgid "Not run"
-msgstr "Nie wykonaj"
+msgstr "Nie uruchomiono"
 
 #: ../src/agnostics.c:461
 msgid "Test"
@@ -77,11 +77,11 @@ msgstr "Wykonaj test?"
 
 #: ../src/agnostics.c:473
 msgid "Result"
-msgstr "Resultat"
+msgstr "Wynik"
 
 #: ../data/sdtest.sh:2
 msgid "SD Card Speed Test"
-msgstr "Test prędkości SD karty"
+msgstr "Test prędkości karty SD"
 
 #: ../data/sdtest.sh:3
 msgid ""
@@ -89,9 +89,9 @@ msgid ""
 "\n"
 "Should be run on a new or newly-formatted SD card."
 msgstr ""
-"Ustaw, czy karta jest w stanie czytać i pisać z odpowiednią prędkością i zapewnia odpowiednią wydajność.\n"
+"Sprawdza, czy karta SD może odczytywać i zapisywać dane wystarczająco szybko, aby zapewnić odpowiednią wydajność.\n"
 "\n"
-"Powinny wykonat przy użyciu nowej lub nowo sformatowanej karty."
+"Należy uruchomić na nowej lub nowo sformatowanej karcie SD."
 
 #: ../data/agnostics.ui.h:2
 msgid "_Cancel"
@@ -99,7 +99,7 @@ msgstr "_Anuluj"
 
 #: ../data/agnostics.ui.h:3
 msgid "_OK"
-msgstr "_Dobra"
+msgstr "_OK"
 
 #: ../data/agnostics.ui.h:4 ../data/agnostics.desktop.in.h:1
 msgid "Raspberry Pi Diagnostics"
@@ -123,4 +123,4 @@ msgstr "_Wykonaj test"
 
 #: ../data/agnostics.desktop.in.h:2
 msgid "Test the Raspberry Pi hardware"
-msgstr "Testuj Raspberry Pi komputerow"
+msgstr "Testowanie sprzętu Raspberry Pi"
